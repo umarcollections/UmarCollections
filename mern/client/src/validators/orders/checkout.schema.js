@@ -28,17 +28,24 @@ export const checkoutSchema = z.object({
   notes: z.string().trim().max(500, 'Notes must be at most 500 characters'),
 });
 
-// screenshot is the FileList from the file input; it is optional
+// While photo uploads are off the screenshot field isn't on the page, and the
+// reference alone is enough
 export const paymentSchema = z.object({
   reference: text('Transaction reference', 3, 100),
+});
+
+// screenshot is the FileList from the file input
+export const paymentWithScreenshotSchema = paymentSchema.extend({
   screenshot: z
     .custom()
-    .refine((files) => !files?.length || IMAGE_TYPES.includes(files[0].type), {
+    .refine((files) => files?.length > 0, {
+      message: 'Attach a screenshot of your payment',
+      abort: true,
+    })
+    .refine((files) => IMAGE_TYPES.includes(files[0].type), {
       message: 'Screenshot must be a JPG, PNG or WebP image',
     })
-    .refine((files) => !files?.length || files[0].size <= MAX_IMAGE_MB * 1024 * 1024, {
+    .refine((files) => files[0].size <= MAX_IMAGE_MB * 1024 * 1024, {
       message: `Screenshot must be ${MAX_IMAGE_MB} MB or smaller`,
-    })
-    // The field isn't on the page at all while photo uploads are off
-    .optional(),
+    }),
 });

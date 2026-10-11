@@ -22,7 +22,7 @@ const ProductPage = () => {
     .filter((item) => item._id !== product?._id)
     .slice(0, RELATED);
 
-  usePageTitle(product?.title ?? (error ? 'Product not found' : ''));
+  usePageTitle(product?.title ?? (error ? 'Product not found' : ''), product?.description);
   useStoreMotion(page, [product?._id, related.map((item) => item._id).join()]);
 
   return (

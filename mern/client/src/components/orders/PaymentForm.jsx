@@ -4,12 +4,15 @@ import { toast } from 'sonner';
 import StoreField from '../store/StoreField.jsx';
 import FormAlert from '../common/FormAlert.jsx';
 import { useSubmitPayment } from '../../hooks/orders/useOrders.js';
-import { paymentSchema } from '../../validators/orders/checkout.schema.js';
+import {
+  paymentSchema,
+  paymentWithScreenshotSchema,
+} from '../../validators/orders/checkout.schema.js';
 import { IMAGE_TYPES, MAX_IMAGE_MB } from '../../validators/products/product.schema.js';
 import StoreButton from '../store/StoreButton.jsx';
 
-// uploadsEnabled is false until the store owner sets up image storage; the
-// reference alone is still enough for them to find the payment
+// The screenshot is required while photo uploads are on. Until the store owner
+// sets up image storage the reference alone is enough to find the payment.
 const PaymentForm = ({ orderNumber, orderKey, uploadsEnabled }) => {
   const submitPayment = useSubmitPayment(orderNumber, orderKey);
   const {
@@ -18,7 +21,7 @@ const PaymentForm = ({ orderNumber, orderKey, uploadsEnabled }) => {
     setError,
     formState: { errors, isSubmitting },
   } = useForm({
-    resolver: zodResolver(paymentSchema),
+    resolver: zodResolver(uploadsEnabled ? paymentWithScreenshotSchema : paymentSchema),
     defaultValues: { reference: '' },
   });
 
@@ -42,7 +45,7 @@ const PaymentForm = ({ orderNumber, orderKey, uploadsEnabled }) => {
       />
       {uploadsEnabled && (
         <StoreField
-          label="Payment screenshot (optional)"
+          label="Payment screenshot"
           type="file"
           accept={IMAGE_TYPES.join(',')}
           hint={`JPG, PNG or WebP, up to ${MAX_IMAGE_MB} MB`}

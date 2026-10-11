@@ -1,5 +1,7 @@
 import Order from '../../models/order.model.js';
 import releaseOrderHolds from './releaseOrderHolds.js';
+import { orderCancelledEmail } from '../email/orderEmails.js';
+import sendEmail from '../email/sendEmail.js';
 
 const CHECK_EVERY_MS = 10 * 60 * 1000;
 
@@ -25,10 +27,22 @@ export const cancelUnpaidOrders = async (now = new Date()) => {
     );
     if (order) {
       await releaseOrderHolds(order);
+      await sendEmail(orderCancelledEmail(order, { expired: true }));
       cancelled += 1;
     }
   }
   return cancelled;
+};
+
+// For hosts without an always-on server (Vercel): called on incoming requests,
+// it runs the check at most once every 10 minutes per instance
+let lastRun = 0;
+export const cancelUnpaidOrdersIfDue = async () => {
+  if (Date.now() - lastRun < CHECK_EVERY_MS) return;
+  lastRun = Date.now();
+  await cancelUnpaidOrders().catch((error) =>
+    console.error('Cancelling unpaid orders failed:', error)
+  );
 };
 
 // Runs the check now and every 10 minutes while the server is up

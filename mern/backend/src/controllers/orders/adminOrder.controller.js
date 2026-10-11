@@ -1,6 +1,13 @@
 import Order from '../../models/order.model.js';
 import { getSettings } from '../../models/settings.model.js';
 import ApiError from '../../utils/ApiError.js';
+import {
+  orderCancelledEmail,
+  orderShippedEmail,
+  paymentConfirmedEmail,
+  paymentRejectedEmail,
+} from '../../utils/email/orderEmails.js';
+import sendEmail from '../../utils/email/sendEmail.js';
 import { deleteImage } from '../../utils/imageStorage.js';
 import releaseOrderHolds from '../../utils/orders/releaseOrderHolds.js';
 import { escapeRegex, paginate } from '../../utils/query.js';
@@ -65,6 +72,14 @@ const buildChange = async (body, now) => {
     case 'cancel':
       return { status: 'cancelled', set: {}, note: body.note || 'Cancelled by the store' };
   }
+};
+
+// What the customer is told after each action; delivered orders need no email
+const CUSTOMER_EMAILS = {
+  confirm_payment: paymentConfirmedEmail,
+  reject_payment: paymentRejectedEmail,
+  ship: orderShippedEmail,
+  cancel: (order, body) => orderCancelledEmail(order, { reason: body.note }),
 };
 
 const searchFilter = (q) => {
@@ -133,5 +148,8 @@ export const applyOrderAction = async (req, res) => {
     await deleteImage(before.payment.screenshot.publicId).catch(() => {});
   }
 
-  res.json({ success: true, data: await Order.findById(before._id) });
+  const order = await Order.findById(before._id);
+  const customerEmail = CUSTOMER_EMAILS[req.body.action];
+  if (customerEmail) await sendEmail(customerEmail(order, req.body));
+  res.json({ success: true, data: order });
 };

@@ -11,6 +11,9 @@ const store = {
   // ISO 4217 code used for every price on the site
   currency: 'PKR',
   locale: 'en-PK',
+  // Search result text for pages without their own; keep in step with client/index.html
+  description:
+    'Clothing, knitwear and bags for everyday wear from Umar Collections, Faisalabad. Delivery within Faisalabad, pay by bank transfer.',
 };
 
 // Digits only, for tel: and wa.me links

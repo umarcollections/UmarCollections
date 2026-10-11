@@ -28,3 +28,14 @@ export const loginSchema = z.object({
   email: emailField,
   password: z.string({ error: 'Password is required' }).min(1, 'Password is required'),
 });
+
+export const forgotPasswordSchema = z.object({ email: emailField });
+
+export const resetPasswordSchema = z.object({
+  token: z
+    .string({ error: 'Reset link is missing' })
+    .trim()
+    .min(1, 'Reset link is missing')
+    .max(200),
+  password: passwordField,
+});

@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -68,6 +68,14 @@ const LoginForm = ({ redirectTo, onSwitch }) => {
           error={errors.password?.message}
           {...register('password')}
         />
+        <div className="-mt-3 text-right">
+          <Link
+            to="/forgot-password"
+            className="inline-block py-2 text-xs font-semibold text-espresso-800 underline underline-offset-4 hover:text-espresso-900"
+          >
+            Forgot password?
+          </Link>
+        </div>
         <StoreButton type="submit" disabled={isSubmitting} className="w-full">
           {isSubmitting ? 'Logging in…' : 'Log in'}
         </StoreButton>

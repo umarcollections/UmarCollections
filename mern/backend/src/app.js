@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import env from './config/env.js';
 import routes from './routes/index.js';
+import seoRoutes from './routes/seo/seo.routes.js';
 import csrfProtection from './middleware/auth/csrf.js';
 import notFound from './middleware/notFound.js';
 import errorHandler from './middleware/errorHandler.js';
@@ -27,6 +28,9 @@ app.use(csrfProtection);
 app.get('/', (req, res) => {
   res.json({ success: true, message: 'API is running' });
 });
+
+// sitemap.xml and robots.txt, which crawlers expect at the site root
+app.use(seoRoutes);
 
 // All API routes live under /api
 app.use('/api', routes);

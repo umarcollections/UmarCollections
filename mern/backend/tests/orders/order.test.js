@@ -240,6 +240,18 @@ describe('viewing and paying for an order', () => {
     expect(again.status).toBe(409);
   });
 
+  it('requires a screenshot while uploads are on', async () => {
+    const { order, key } = await setup();
+    const res = await api()
+      .post(`/api/orders/${order.orderNumber}/payment?key=${key}`)
+      .field('reference', 'TRX-1');
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/screenshot/i);
+    expect((await Order.findById(order._id)).status).toBe('awaiting_payment');
+    expect(uploadImage).not.toHaveBeenCalled();
+  });
+
   it('accepts a reference alone, and refuses a screenshot while uploads are off', async () => {
     const { order, key } = await setup();
     const url = `/api/orders/${order.orderNumber}/payment?key=${key}`;
@@ -271,7 +283,8 @@ describe('cancelUnpaidOrders', () => {
     const paid = (await placeOrder([item(small)])).body.data;
     await api()
       .post(`/api/orders/${paid.order.orderNumber}/payment?key=${paid.key}`)
-      .field('reference', 'TRX-1');
+      .field('reference', 'TRX-1')
+      .attach('screenshot', Buffer.from('img'), { filename: 'p.png', contentType: 'image/png' });
     expect(await stockOf(shirt.id, small.id)).toBe(0);
 
     const later = new Date(Date.now() + 49 * 60 * 60 * 1000);

@@ -2,7 +2,8 @@ import multer from 'multer';
 import ApiError from '../utils/ApiError.js';
 
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-export const MAX_IMAGE_MB = 5;
+// 4 MB keeps each upload under the 4.5 MB request limit on Vercel
+export const MAX_IMAGE_MB = 4;
 
 // Keeps files in memory just long enough to stream them to Cloudinary:
 //   router.post('/:id/images', uploadImages.array('images', 10), addImages);

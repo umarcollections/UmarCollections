@@ -5,7 +5,8 @@ export const PRODUCT_STATUSES = ['draft', 'active', 'archived'];
 export const MAX_OPTIONS = 3;
 export const MAX_VARIANTS = 100;
 export const MAX_IMAGES = 10;
-export const MAX_IMAGE_MB = 5;
+// 4 MB keeps each upload under the 4.5 MB request limit on Vercel
+export const MAX_IMAGE_MB = 4;
 export const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 // Checked before uploading so the admin isn't left waiting on a file the API will refuse

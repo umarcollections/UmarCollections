@@ -52,7 +52,7 @@ Checkout stays closed until at least one bank account is saved in `/admin/settin
 1. The customer places the order. The items' stock is reserved straight away, so
    nobody else can buy the same last item.
 2. They see the bank details and transfer the total, then send the transaction
-   reference (and a screenshot once uploads are set up). Status: payment being checked.
+   reference and a screenshot (required once uploads are set up). Status: payment being checked.
 3. In `/admin/orders` you confirm the payment once it is in your account, or
    reject it with a reason (the customer sees it and gets a new deadline). Then
    mark it shipped (optional courier and tracking number) and delivered.
@@ -141,12 +141,67 @@ injected script) can never read it.
 CSRF: state-changing requests must send `X-Requested-With`, which other sites
 can't add without passing CORS. `services/api.js` does this for you.
 
-## Production notes
+## Deploying to Vercel
 
-- Build the client with `VITE_API_URL` set to the deployed API, e.g. `https://api.example.com/api`.
-- Set `CLIENT_URL` on the backend to the deployed client URL (CORS).
-- Serve the API over HTTPS; the cookie is `Secure` when `NODE_ENV=production`.
-- Easiest: client and API on the same site (`app.example.com` + `api.example.com`,
-  or one domain with `/api` proxied), which works with the default `COOKIE_SAMESITE=lax`.
-  Only if they are on different sites, set `COOKIE_SAMESITE=none`.
-- Set `TRUST_PROXY=1` when the backend runs behind a reverse proxy.
+One Vercel project serves both halves: the built client from `client/dist`, and the
+Express API as a single function in `api/index.js`. `vercel.json` sends `/api/*`,
+`/sitemap.xml` and `/robots.txt` to that function and every other path to the
+client. Because the shop and the API share one address, the login cookie stays
+first-party and no CORS or cookie settings are needed.
+
+1. Push the repo to GitHub and import it in Vercel. Leave the root directory as the
+   repo root; `vercel.json` sets the install, build and output settings.
+2. In MongoDB Atlas, Network Access: allow `0.0.0.0/0`. Vercel's addresses change, so
+   the database can't be locked to one IP; the strong database password protects it.
+3. In Vercel, Settings, Environment Variables, add these for Production:
+
+   | Variable                | Value                                                    |
+   | ----------------------- | -------------------------------------------------------- |
+   | `NODE_ENV`              | `production`                                             |
+   | `MONGO_URI`             | the Atlas connection string                              |
+   | `JWT_SECRET`            | a new long random string (see below)                     |
+   | `ADMIN_EMAIL`           | the owner's admin email                                  |
+   | `ADMIN_PASSWORD`        | a new admin password, 8 to 72 characters                 |
+   | `TRUST_PROXY`           | `1`                                                      |
+   | `CLOUDINARY_CLOUD_NAME` | from the Cloudinary dashboard                            |
+   | `CLOUDINARY_API_KEY`    | from the Cloudinary dashboard                            |
+   | `CLOUDINARY_API_SECRET` | from the Cloudinary dashboard                            |
+   | `ALERT_WHATSAPP_PHONE`  | phone for order alerts, digits only, e.g. `923074801091` |
+   | `CALLMEBOT_API_KEY`     | from CallMeBot (see below)                               |
+   | `RESEND_API_KEY`        | from Resend, for emails (see below)                      |
+   | `EMAIL_FROM`            | only after verifying a domain in Resend (see below)      |
+
+   Make a `JWT_SECRET` with:
+   `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`
+
+4. Deploy. The admin account is created on the first request; sign in at `/admin/login`.
+
+Notes:
+
+- `SITE_URL` and `CLIENT_URL` aren't needed on Vercel: the production domain is picked
+  up automatically, including a custom domain added later in Vercel's Domains settings.
+- The function runs in Mumbai (`regions: ["bom1"]` in `vercel.json`), next to the
+  Atlas cluster (AWS ap-south-1). If the database moves, move the region with it.
+- Each upload must stay under Vercel's 4.5 MB request limit, so images are capped at
+  4 MB and the admin sends product photos one at a time.
+- There is no always-on server, so overdue unpaid orders are cancelled while handling
+  requests (at most every 10 minutes) instead of on a timer.
+- Login and order rate limits are kept per function instance, so on Vercel they are
+  looser than on a single server.
+- WhatsApp alerts: on the phone that should get them, follow the WhatsApp steps on
+  https://www.callmebot.com (save their number and send the message they show). The
+  reply contains the API key. Without it the store works and simply sends no alerts.
+- Emails go through Resend: order placed (with bank details and the private order
+  link), payment confirmed or rejected, shipped and cancelled to the customer; new
+  order and payment to check to the owner (`OWNER_EMAIL`, default the store email);
+  and forgot-password links. Until a domain is verified in Resend they only reach
+  the Resend account's own address. After verifying (Resend, Domains), set
+  `EMAIL_FROM`, e.g. `Umar Collections <orders@umarcollections.pk>`. A failed email
+  is logged and never fails the order.
+- Link previews (WhatsApp, Facebook) show `client/public/og-image.jpg` for every page.
+  The site is a single-page app, so pages can't have their own preview.
+
+Other hosts: run `npm start` for the API and serve `client/dist`, keeping both on one
+site (or set `COOKIE_SAMESITE=none` if they are on different sites). Set `SITE_URL`,
+`CLIENT_URL` and `TRUST_PROXY=1`, and build the client with `VITE_API_URL` if the API
+is on another address.

@@ -49,8 +49,23 @@ export const useCreateProduct = () => useProductMutation(createProductRequest);
 export const useUpdateProduct = (id) =>
   useProductMutation((payload) => updateProductRequest(id, payload));
 
-export const useUploadProductImages = (id) =>
-  useProductMutation((files) => uploadProductImagesRequest(id, files));
+// One photo per request, because hosts such as Vercel refuse requests over
+// 4.5 MB. If one fails, the photos already added stay and the page reloads them.
+export const useUploadProductImages = (id) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (files) => {
+      let product;
+      for (const file of files) {
+        product = (await uploadProductImagesRequest(id, [file])).data;
+      }
+      return product;
+    },
+    onSuccess: (product) => queryClient.setQueryData(adminProductKeys.detail(id), product),
+    onError: () => queryClient.invalidateQueries({ queryKey: adminProductKeys.detail(id) }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: adminProductKeys.lists }),
+  });
+};
 
 export const useRemoveProductImage = (id) =>
   useProductMutation((imageId) => removeProductImageRequest(id, imageId));

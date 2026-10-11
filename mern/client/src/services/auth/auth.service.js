@@ -18,3 +18,11 @@ export const logoutRequest = () =>
 
 // Resolves to { data: user } when signed in and { data: null } for a guest
 export const getSessionRequest = () => request('/auth/session');
+
+// Both resolve to { message }; forgot-password answers the same whether or not
+// the email has an account
+export const forgotPasswordRequest = (email) =>
+  request('/auth/forgot-password', { method: 'POST', body: { email } });
+
+export const resetPasswordRequest = (token, password) =>
+  request('/auth/reset-password', { method: 'POST', body: { token, password } });

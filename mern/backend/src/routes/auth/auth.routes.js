@@ -6,12 +6,19 @@ import {
   logout,
   getMe,
   getSession,
+  forgotPassword,
+  resetPassword,
 } from '../../controllers/auth/auth.controller.js';
 import optionalAuth from '../../middleware/auth/optionalAuth.js';
 import protect from '../../middleware/auth/protect.js';
-import { authLimiter } from '../../middleware/auth/rateLimit.js';
+import { authLimiter, passwordResetLimiter } from '../../middleware/auth/rateLimit.js';
 import validate from '../../middleware/validate.js';
-import { loginSchema, signupSchema } from '../../validators/auth/auth.schema.js';
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  resetPasswordSchema,
+  signupSchema,
+} from '../../validators/auth/auth.schema.js';
 
 const router = Router();
 
@@ -21,5 +28,12 @@ router.post('/admin/login', authLimiter, validate(loginSchema), adminLogin);
 router.post('/logout', logout);
 router.get('/me', protect, getMe);
 router.get('/session', optionalAuth, getSession);
+router.post(
+  '/forgot-password',
+  passwordResetLimiter,
+  validate(forgotPasswordSchema),
+  forgotPassword
+);
+router.post('/reset-password', passwordResetLimiter, validate(resetPasswordSchema), resetPassword);
 
 export default router;

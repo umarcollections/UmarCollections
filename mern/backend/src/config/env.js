@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import store from './store.js';
 
 // Every env var the app reads lives here, so a missing value stops the
 // server at startup instead of failing on the first request that needs it.
@@ -37,6 +38,31 @@ const env = {
     apiKey: process.env.CLOUDINARY_API_KEY?.trim(),
     apiSecret: process.env.CLOUDINARY_API_SECRET?.trim(),
   },
+  // Public address of the store, for links in WhatsApp alerts and the sitemap.
+  // On Vercel it defaults to the project's production domain; elsewhere the
+  // address the request came in on is used.
+  siteUrl: (
+    process.env.SITE_URL?.trim() ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : '')
+  ).replace(/\/$/, ''),
+  // New-order alerts to the owner's WhatsApp through CallMeBot. Optional:
+  // without both values no alerts are sent.
+  whatsappAlerts: {
+    phone: process.env.ALERT_WHATSAPP_PHONE?.replace(/\D/g, ''),
+    apiKey: process.env.CALLMEBOT_API_KEY?.trim(),
+  },
+  // Emails to customers and the owner, sent through Resend. Optional: without
+  // RESEND_API_KEY no emails are sent and everything else works.
+  email: {
+    apiKey: process.env.RESEND_API_KEY?.trim(),
+    // Until a domain is verified in Resend, only their test sender works, and
+    // it only delivers to the Resend account's own email address
+    from: process.env.EMAIL_FROM?.trim() || 'Umar Collections <onboarding@resend.dev>',
+    // Where order alerts for the owner go
+    owner: process.env.OWNER_EMAIL?.trim() || store.email,
+  },
   // The store owner's login. On startup this account is created, or made an
   // admin with this password if it already exists (see utils/auth/seedAdmin.js).
   admin: {
@@ -48,6 +74,8 @@ const env = {
 env.cloudinary.enabled = Boolean(
   env.cloudinary.cloudName && env.cloudinary.apiKey && env.cloudinary.apiSecret
 );
+env.whatsappAlerts.enabled = Boolean(env.whatsappAlerts.phone && env.whatsappAlerts.apiKey);
+env.email.enabled = Boolean(env.email.apiKey);
 
 if (Boolean(env.admin.email) !== Boolean(env.admin.password)) {
   console.error('Set both ADMIN_EMAIL and ADMIN_PASSWORD, or neither');

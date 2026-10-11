@@ -29,7 +29,7 @@ const StoreField = ({
         id={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={note ? noteId : undefined}
-        className={`w-full border bg-cream-50 px-5 text-sm text-espresso-900 outline-none transition placeholder:text-espresso-700/45 focus:bg-white focus:ring-4 ${shape} ${
+        className={`w-full border bg-cream-50 px-5 text-sm text-espresso-900 outline-none transition placeholder:text-espresso-700/45 file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-espresso-900 file:px-4 file:py-1.5 file:text-[11px] file:font-semibold file:uppercase file:tracking-[0.15em] file:text-cream-50 hover:file:bg-espresso-800 focus:bg-white focus:ring-4 ${shape} ${
           error
             ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15'
             : 'border-caramel-300 focus:border-caramel-500 focus:ring-caramel-400/20'

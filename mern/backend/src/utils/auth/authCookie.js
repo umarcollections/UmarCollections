@@ -15,8 +15,8 @@ const cookieOptions = () => ({
 
 // Signs a token for the user, sets it as the auth cookie and returns
 // when the session expires
-export const startSession = (res, userId) => {
-  const token = generateToken(userId);
+export const startSession = (res, user) => {
+  const token = generateToken(user);
   const expiresAt = new Date(jwt.decode(token).exp * 1000);
   res.cookie(AUTH_COOKIE, token, { ...cookieOptions(), expires: expiresAt });
   return expiresAt;

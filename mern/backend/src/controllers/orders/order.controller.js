@@ -1,13 +1,28 @@
+import env from '../../config/env.js';
 import Order from '../../models/order.model.js';
 import ApiError from '../../utils/ApiError.js';
 import { deleteImage, isImageStorageReady, uploadImage } from '../../utils/imageStorage.js';
 import { orderKeyMatches } from '../../utils/orders/orderKey.js';
 import placeOrder from '../../utils/orders/placeOrder.js';
 import { priceCart } from '../../utils/orders/pricing.js';
+import {
+  newOrderAlert,
+  paymentSentAlert,
+  sendOwnerAlert,
+} from '../../utils/orders/whatsappAlert.js';
+import {
+  orderPlacedEmail,
+  ownerNewOrderEmail,
+  ownerPaymentSentEmail,
+} from '../../utils/email/orderEmails.js';
+import sendEmail from '../../utils/email/sendEmail.js';
+import siteUrl from '../../utils/siteUrl.js';
 
 // Customer-facing order routes. Guests prove an order is theirs with the key
 // from their order link (?key=...); signed-in customers can also open orders
 // they placed while signed in.
+
+const adminOrderUrl = (req, order) => `${siteUrl(req)}/admin/orders/${order._id}`;
 
 const ownsOrder = (user, order) => Boolean(user && order.user?.equals(user._id));
 
@@ -45,6 +60,13 @@ export const quoteCart = async (req, res) => {
 // POST /api/orders
 export const createOrder = async (req, res) => {
   const { order, key } = await placeOrder({ ...req.body, userId: req.user?._id });
+  const orderUrl = `${siteUrl(req)}/orders/${order.orderNumber}?key=${encodeURIComponent(key)}`;
+  const adminUrl = adminOrderUrl(req, order);
+  await Promise.all([
+    sendEmail(orderPlacedEmail(order, orderUrl)),
+    sendEmail(ownerNewOrderEmail(order, adminUrl, env.email.owner)),
+    sendOwnerAlert(newOrderAlert(order, adminUrl)),
+  ]);
   res.status(201).json({ success: true, data: { order, key } });
 };
 
@@ -61,7 +83,9 @@ export const getOrder = async (req, res) => {
   res.json({ success: true, data: order });
 };
 
-// POST /api/orders/:orderNumber/payment?key= (multipart: reference, optional screenshot)
+// POST /api/orders/:orderNumber/payment?key= (multipart: reference, screenshot)
+// The screenshot is required while image storage is set up. Without storage the
+// reference alone is accepted, so a missing key never stops customers paying.
 export const submitPayment = async (req, res) => {
   const order = await findCustomerOrder(req.params.orderNumber, req.query.key, req.user);
 
@@ -69,8 +93,12 @@ export const submitPayment = async (req, res) => {
   if (order.status !== 'awaiting_payment') {
     throw new ApiError(409, 'Payment details for this order have already been sent');
   }
-  if (req.file && !isImageStorageReady()) {
+  const storageReady = isImageStorageReady();
+  if (req.file && !storageReady) {
     throw new ApiError(503, 'Screenshot uploads are not available yet. Send the reference only.');
+  }
+  if (!req.file && storageReady) {
+    throw new ApiError(400, 'Please attach a screenshot of your payment');
   }
 
   const screenshot = req.file ? await uploadImage(req.file.buffer, 'payments') : null;
@@ -92,5 +120,10 @@ export const submitPayment = async (req, res) => {
     if (screenshot) await deleteImage(screenshot.publicId).catch(() => {});
     throw new ApiError(409, 'This order can no longer be paid. Please contact us.');
   }
+  const adminUrl = adminOrderUrl(req, updated);
+  await Promise.all([
+    sendEmail(ownerPaymentSentEmail(updated, adminUrl, env.email.owner)),
+    sendOwnerAlert(paymentSentAlert(updated, adminUrl)),
+  ]);
   res.json({ success: true, data: updated });
 };

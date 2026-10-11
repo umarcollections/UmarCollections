@@ -33,6 +33,9 @@ const protect = async (req, res, next) => {
 
   const user = await User.findById(decoded.id);
   if (!user) throw new ApiError(401, 'User no longer exists');
+  if (!user.acceptsSession(decoded)) {
+    throw new ApiError(401, 'Your password was changed, please log in again');
+  }
 
   req.user = user;
   req.auth = { expiresAt: new Date(decoded.exp * 1000) };

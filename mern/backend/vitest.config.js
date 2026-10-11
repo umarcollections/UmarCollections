@@ -15,6 +15,16 @@ export default defineConfig({
       // Used by tests/auth/admin.test.js; seeding only runs when a test calls it
       ADMIN_EMAIL: 'owner@example.com',
       ADMIN_PASSWORD: 'owner-password-123',
+      // Empty so tests never upload to the real Cloudinary account; tests that
+      // need image storage mock utils/imageStorage.js
+      CLOUDINARY_CLOUD_NAME: '',
+      CLOUDINARY_API_KEY: '',
+      CLOUDINARY_API_SECRET: '',
+      // Likewise, tests never send real emails or WhatsApp alerts
+      RESEND_API_KEY: '',
+      ALERT_WHATSAPP_PHONE: '',
+      CALLMEBOT_API_KEY: '',
+      SITE_URL: '',
     },
     // The first run downloads a MongoDB binary
     hookTimeout: 120_000,

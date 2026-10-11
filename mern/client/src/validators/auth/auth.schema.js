@@ -23,3 +23,15 @@ export const signupSchema = z.object({
     .min(PASSWORD_MIN, `Password must be at least ${PASSWORD_MIN} characters`)
     .max(72, 'Password must be at most 72 characters'),
 });
+
+export const forgotPasswordSchema = z.object({ email: emailField });
+
+export const resetPasswordSchema = z
+  .object({
+    password: signupSchema.shape.password,
+    confirmPassword: z.string().min(1, 'Type the new password again'),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: "The passwords don't match",
+    path: ['confirmPassword'],
+  });

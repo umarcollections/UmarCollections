@@ -7,6 +7,7 @@ import AnnouncementBar from './AnnouncementBar.jsx';
 import CartDrawer from '../cart/CartDrawer.jsx';
 import StoreFooter from './StoreFooter.jsx';
 import StoreHeader from './StoreHeader.jsx';
+import WhatsAppButton from './WhatsAppButton.jsx';
 
 // /login and /signup are one page whose panel slides between them, so moving
 // between the two must not count as changing page
@@ -116,6 +117,7 @@ const StoreLayout = () => {
         </Suspense>
       </main>
       <StoreFooter />
+      <WhatsAppButton />
       <CartDrawer />
     </div>
   );

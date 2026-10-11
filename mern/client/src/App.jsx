@@ -25,6 +25,8 @@ const CartPage = storePage(() => import('./pages/cart/CartPage.jsx'));
 const CheckoutPage = storePage(() => import('./pages/cart/CheckoutPage.jsx'));
 const OrderPage = storePage(() => import('./pages/orders/OrderPage.jsx'));
 const AuthPage = storePage(() => import('./pages/auth/AuthPage.jsx'));
+const ForgotPasswordPage = storePage(() => import('./pages/auth/ForgotPasswordPage.jsx'));
+const ResetPasswordPage = storePage(() => import('./pages/auth/ResetPasswordPage.jsx'));
 const AccountPage = storePage(() => import('./pages/account/AccountPage.jsx'));
 const PrivacyPage = storePage(() => import('./pages/legal/PrivacyPage.jsx'));
 const TermsPage = storePage(() => import('./pages/legal/TermsPage.jsx'));
@@ -72,10 +74,12 @@ const App = () => {
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
 
-          {/* Log in and sign up: one sliding page, only for logged-out visitors */}
+          {/* Log in, sign up and password reset: only for logged-out visitors */}
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<AuthPage />} />
             <Route path="/signup" element={<AuthPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
           </Route>
 
           {/* Customer account: signed-in customers only */}

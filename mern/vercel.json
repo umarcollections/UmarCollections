@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm run install:all",
+  "buildCommand": "npm run build",
+  "outputDirectory": "client/dist",
+  "regions": ["bom1"],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/sitemap.xml", "destination": "/api/index" },
+    { "source": "/robots.txt", "destination": "/api/index" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

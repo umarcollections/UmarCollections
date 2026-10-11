@@ -31,12 +31,21 @@ const userSchema = new mongoose.Schema(
       enum: { values: ROLES, message: 'Role must be one of: ' + ROLES.join(', ') },
       default: 'user',
     },
+    // Stamped into every login; raised when the password changes, which signs
+    // out every login made before (see middleware/auth/protect.js)
+    sessionVersion: { type: Number, default: 0 },
+    // Forgot-password link: only its hash is stored, like the order links
+    resetPasswordHash: { type: String, select: false },
+    resetPasswordExpires: { type: Date, select: false },
   },
   {
     timestamps: true,
     toJSON: {
       transform: (doc, ret) => {
         delete ret.password;
+        delete ret.resetPasswordHash;
+        delete ret.resetPasswordExpires;
+        delete ret.sessionVersion;
         delete ret.__v;
         return ret;
       },
@@ -48,7 +57,14 @@ const userSchema = new mongoose.Schema(
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
+  // A changed password signs out every device logged in before the change
+  if (!this.isNew) this.sessionVersion += 1;
 });
+
+// Logins made before this version existed carry none, and count as version 0
+userSchema.methods.acceptsSession = function (decodedToken) {
+  return (decodedToken.v ?? 0) === this.sessionVersion;
+};
 
 userSchema.methods.comparePassword = function (candidate) {
   return bcrypt.compare(candidate, this.password);

@@ -10,6 +10,7 @@ import { SplitText } from 'gsap/SplitText';
 import queryClient from './lib/queryClient.js';
 import AuthProvider from './context/auth/AuthProvider.jsx';
 import CartProvider from './context/cart/CartProvider.jsx';
+import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 import './index.css';
 import App from './App.jsx';
 
@@ -24,7 +25,9 @@ createRoot(document.getElementById('root')).render(
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <CartProvider>
-            <App />
+            <ErrorBoundary>
+              <App />
+            </ErrorBoundary>
             <Toaster position="top-right" richColors closeButton />
           </CartProvider>
         </AuthProvider>

@@ -48,20 +48,24 @@ The "V" is the React app in `../client`: this API only returns JSON.
 
 ## Endpoints
 
-| Method | URL                   | Access    | Action                     |
-| ------ | --------------------- | --------- | -------------------------- |
-| GET    | /                     | public    | health check               |
-| POST   | /api/auth/signup      | public    | create account, set cookie |
-| POST   | /api/auth/login       | public    | log in, set cookie         |
-| POST   | /api/auth/admin/login | public    | log in, admins only        |
-| POST   | /api/auth/logout      | public    | clear cookie               |
-| GET    | /api/auth/me          | logged in | current user + expiry      |
-| GET    | /api/auth/session     | public    | current user or null       |
-| GET    | /api/users            | admin     | list users                 |
-| GET    | /api/users/:id        | admin     | get one                    |
-| POST   | /api/users            | admin     | create                     |
-| PUT    | /api/users/:id        | admin     | update name, email, role   |
-| DELETE | /api/users/:id        | admin     | delete (not yourself)      |
+| Method | URL                       | Access    | Action                     |
+| ------ | ------------------------- | --------- | -------------------------- |
+| GET    | /                         | public    | health check               |
+| GET    | /sitemap.xml              | public    | pages for search engines   |
+| GET    | /robots.txt               | public    | crawler rules + sitemap    |
+| POST   | /api/auth/signup          | public    | create account, set cookie |
+| POST   | /api/auth/login           | public    | log in, set cookie         |
+| POST   | /api/auth/admin/login     | public    | log in, admins only        |
+| POST   | /api/auth/logout          | public    | clear cookie               |
+| GET    | /api/auth/me              | logged in | current user + expiry      |
+| GET    | /api/auth/session         | public    | current user or null       |
+| POST   | /api/auth/forgot-password | public    | emails a reset link        |
+| POST   | /api/auth/reset-password  | public    | sets a new password        |
+| GET    | /api/users                | admin     | list users                 |
+| GET    | /api/users/:id            | admin     | get one                    |
+| POST   | /api/users                | admin     | create                     |
+| PUT    | /api/users/:id            | admin     | update name, email, role   |
+| DELETE | /api/users/:id            | admin     | delete (not yourself)      |
 
 ### Store
 
@@ -93,7 +97,7 @@ Public routes only ever return products with status `active`.
 | POST | /api/orders | public | place an order (10 per hour per IP) |
 | GET | /api/orders/mine | logged in | orders placed while signed in |
 | GET | /api/orders/:number?key= | key or owner | one order (no key needed for the signed-in owner) |
-| POST | /api/orders/:number/payment?key= | key | send `reference` (+ optional `screenshot`) |
+| POST | /api/orders/:number/payment?key= | key | send `reference` + `screenshot` (screenshot required once uploads are set up) |
 | GET | /api/admin/orders | admin | list, `?q=&status=&page=&limit=` |
 | GET | /api/admin/orders/:id | admin | one order |
 | POST | /api/admin/orders/:id/actions | admin | `confirm_payment`, `reject_payment`, `ship`, `deliver`, `cancel` |

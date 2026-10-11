@@ -16,7 +16,9 @@ const optionalAuth = async (req, res, next) => {
     return next();
   }
 
-  req.user = (await User.findById(decoded.id)) ?? undefined;
+  const user = await User.findById(decoded.id);
+  // A login from before the last password change counts as a guest
+  req.user = user?.acceptsSession(decoded) ? user : undefined;
   next();
 };
 
