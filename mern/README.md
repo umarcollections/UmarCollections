@@ -153,7 +153,8 @@ first-party and no CORS or cookie settings are needed.
    repo root; `vercel.json` sets the install, build and output settings.
 2. In MongoDB Atlas, Network Access: allow `0.0.0.0/0`. Vercel's addresses change, so
    the database can't be locked to one IP; the strong database password protects it.
-3. In Vercel, Settings, Environment Variables, add these for Production:
+3. In Vercel, Settings, Environment Variables, add these for Production. The quick way:
+   put them in a git-ignored `.env.vercel` file at the repo root and use "Import .env":
 
    | Variable                | Value                                                    |
    | ----------------------- | -------------------------------------------------------- |
