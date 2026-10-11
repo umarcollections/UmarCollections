@@ -1,7 +1,7 @@
 # MERN Template
 
 Express + MongoDB API (`backend/`) and React + Vite + Tailwind + GSAP client (`client/`),
-with JWT auth (signup, login, protected routes, roles) and a dashboard.
+with JWT auth (signup, login, protected routes, roles), a storefront and a store admin.
 
 ## Quick start
 
@@ -15,19 +15,77 @@ npm run dev                                 # API on :5000, client on :5173
 In development the client calls `/api/...` and Vite proxies it to the backend,
 so no CORS setup is needed locally.
 
+## Pages
+
+| URL                    | Who       | What                                            |
+| ---------------------- | --------- | ----------------------------------------------- |
+| `/`                    | everyone  | home: new arrivals and categories               |
+| `/shop`                | everyone  | catalogue with search, category filter and sort |
+| `/products/:slug`      | everyone  | product page with size/colour picker            |
+| `/collections`         | everyone  | all collections                                 |
+| `/about`               | everyone  | about the store                                 |
+| `/cart`                | everyone  | cart, checked against live prices and stock     |
+| `/checkout`            | everyone  | guest checkout (account optional)               |
+| `/orders/:number?key=` | customer  | order status, bank details, payment form        |
+| `/login`, `/signup`    | customers | customer sign-in                                |
+| `/account`             | customers | their details and orders placed while signed in |
+| `/terms`, `/privacy`   | everyone  | Terms and Conditions, Privacy Policy            |
+| `/admin/login`         | admin     | store owner sign-in (admin accounts only)       |
+| `/admin/orders`        | admin     | orders: check payments, ship, deliver, cancel   |
+| `/admin/products`      | admin     | products: add, edit, photos, delete             |
+| `/admin/categories`    | admin     | categories                                      |
+| `/admin/customers`     | admin     | everyone who ordered, with their order history  |
+| `/admin/discounts`     | admin     | discount codes                                  |
+| `/admin/settings`      | admin     | bank accounts, shipping fee, hours to pay       |
+
+## Store admin
+
+The owner account comes from `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `backend/.env`.
+Every time the server starts it creates that account, or resets it to that password
+and the admin role, so changing the password is: edit `.env`, restart.
+Then sign in at `/admin/login`.
+
+Checkout stays closed until at least one bank account is saved in `/admin/settings`.
+
+## How an order works
+
+1. The customer places the order. The items' stock is reserved straight away, so
+   nobody else can buy the same last item.
+2. They see the bank details and transfer the total, then send the transaction
+   reference (and a screenshot once uploads are set up). Status: payment being checked.
+3. In `/admin/orders` you confirm the payment once it is in your account, or
+   reject it with a reason (the customer sees it and gets a new deadline). Then
+   mark it shipped (optional courier and tracking number) and delivered.
+   Cancelling an order before it ships puts its stock back on sale.
+4. Orders not paid within the "hours to pay" setting are cancelled automatically
+   (checked every 10 minutes) and their stock goes back on sale.
+
+Discount codes are a percentage or a fixed amount off the subtotal, with an
+optional minimum spend, expiry date and usage limit. Each order using a code
+takes one use; a cancelled or expired order gives it back. Free shipping is
+judged on the subtotal after the discount.
+
+Guests reach their order through a private link (`/orders/1001?key=...`). Only a
+hash of the key is stored, and a wrong key looks the same as a wrong order number.
+
+Product photos need the `CLOUDINARY_*` keys in `backend/.env` (free account, see
+[backend/README.md](backend/README.md)). Without them everything else works and
+uploads say they are not set up yet.
+
 ## Scripts (run from the root)
 
-| Script                          | What it does                                   |
-| ------------------------------- | ---------------------------------------------- |
-| `npm run dev`                   | backend + client together                      |
-| `npm run dev:backend`           | backend only (nodemon)                         |
-| `npm run dev:client`            | client only (Vite)                             |
-| `npm run build`                 | production build of the client                 |
-| `npm start`                     | start the backend without nodemon              |
-| `npm test`                      | backend tests (in-memory MongoDB, never yours) |
-| `npm run lint`                  | ESLint on backend and client                   |
-| `npm run format`                | format everything with Prettier                |
-| `npm run make-admin -- <email>` | promote a user to admin                        |
+| Script                          | What it does                                                           |
+| ------------------------------- | ---------------------------------------------------------------------- |
+| `npm run dev`                   | backend + client together                                              |
+| `npm run dev:backend`           | backend only (nodemon)                                                 |
+| `npm run dev:client`            | client only (Vite)                                                     |
+| `npm run build`                 | production build of the client                                         |
+| `npm start`                     | start the backend without nodemon                                      |
+| `npm test`                      | backend tests (in-memory MongoDB, never yours)                         |
+| `npm run lint`                  | ESLint on backend and client                                           |
+| `npm run format`                | format everything with Prettier                                        |
+| `npm run make-admin -- <email>` | promote a user to admin                                                |
+| `npm run seed:demo`             | add 16 demo products to preview the store (`-- --remove` deletes them) |
 
 ## Stack
 
@@ -40,7 +98,7 @@ so no CORS setup is needed locally.
 
 ## Conventions
 
-Code is split by feature: every layer gets a folder per feature (`auth`, `dashboard`, `users`).
+Code is split by feature: every layer gets a folder per feature (`auth`, `products`, `orders`, ...).
 
 ```
 backend/src/
@@ -74,7 +132,8 @@ injected script) can never read it.
 1. Signup/login: the API sets the `access_token` cookie (`HttpOnly`, `SameSite=Lax`,
    `Secure` in production). The token is never in the response body.
 2. `services/api.js` sends `credentials: 'include'`, so the browser attaches the cookie.
-3. On page load `AuthProvider` asks `GET /api/auth/me` whether the session is valid.
+3. On page load `AuthProvider` asks `GET /api/auth/session` who is signed in. Guests get
+   `data: null` rather than a 401, so the browser console stays clean.
 4. Logout calls `POST /api/auth/logout`, which clears the cookie.
 5. Any 401 on a protected request logs the user out with a toast.
 6. Logging in or out in one tab updates every open tab (BroadcastChannel).

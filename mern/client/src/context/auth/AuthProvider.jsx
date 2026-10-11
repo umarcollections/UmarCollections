@@ -4,7 +4,8 @@ import { toast } from 'sonner';
 import AuthContext from './AuthContext.js';
 import { UNAUTHORIZED_EVENT } from '../../services/api.js';
 import {
-  getMeRequest,
+  adminLoginRequest,
+  getSessionRequest,
   loginRequest,
   logoutRequest,
   signupRequest,
@@ -14,14 +15,15 @@ import {
 const createChannel = () =>
   typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('auth');
 
-// Asks the server whether the cookie holds a valid session
+// Asks the server whether the cookie holds a valid session. If the server
+// can't be reached, the visitor is treated as a guest.
 const fetchSession = () =>
-  getMeRequest()
-    .then(({ data }) => ({ user: data, status: 'authenticated' }))
+  getSessionRequest()
+    .then(({ data }) => ({ user: data, status: data ? 'authenticated' : 'unauthenticated' }))
     .catch(() => ({ user: null, status: 'unauthenticated' }));
 
 // The session lives in an httpOnly cookie that JavaScript can't read, so the
-// only way to know if we're logged in is to ask the server (GET /auth/me).
+// only way to know if we're logged in is to ask the server (GET /auth/session).
 // status: 'loading' until that answer arrives, then 'authenticated' or 'unauthenticated'
 const AuthProvider = ({ children }) => {
   const queryClient = useQueryClient();
@@ -95,6 +97,11 @@ const AuthProvider = ({ children }) => {
     [startSession]
   );
 
+  const adminLogin = useCallback(
+    async (credentials) => startSession(await adminLoginRequest(credentials)),
+    [startSession]
+  );
+
   const signup = useCallback(
     async (details) => startSession(await signupRequest(details)),
     [startSession]
@@ -116,10 +123,11 @@ const AuthProvider = ({ children }) => {
       status,
       isAuthenticated: status === 'authenticated',
       login,
+      adminLogin,
       signup,
       logout,
     }),
-    [user, status, login, signup, logout]
+    [user, status, login, adminLogin, signup, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

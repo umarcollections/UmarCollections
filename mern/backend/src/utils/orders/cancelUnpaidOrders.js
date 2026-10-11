@@ -1,0 +1,40 @@
+import Order from '../../models/order.model.js';
+import releaseOrderHolds from './releaseOrderHolds.js';
+
+const CHECK_EVERY_MS = 10 * 60 * 1000;
+
+// Cancels orders whose payment window has passed and puts their stock (and
+// discount code use) back.
+// Orders with a submitted payment are left for the admin to check.
+export const cancelUnpaidOrders = async (now = new Date()) => {
+  const due = await Order.find({ status: 'awaiting_payment', paymentDueAt: { $lte: now } }).select(
+    '_id'
+  );
+
+  let cancelled = 0;
+  for (const { _id } of due) {
+    // Matching on the status again means stock is released once, even if the
+    // customer submits payment at the same moment
+    const order = await Order.findOneAndUpdate(
+      { _id, status: 'awaiting_payment' },
+      {
+        $set: { status: 'cancelled' },
+        $push: { history: { status: 'cancelled', note: 'Payment not received in time', at: now } },
+      },
+      { returnDocument: 'after' }
+    );
+    if (order) {
+      await releaseOrderHolds(order);
+      cancelled += 1;
+    }
+  }
+  return cancelled;
+};
+
+// Runs the check now and every 10 minutes while the server is up
+export const scheduleUnpaidOrderCleanup = () => {
+  const run = () =>
+    cancelUnpaidOrders().catch((error) => console.error('Cancelling unpaid orders failed:', error));
+  run();
+  return setInterval(run, CHECK_EVERY_MS);
+};

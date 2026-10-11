@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 760" width="600" height="760" role="img" aria-label="trousers">
+<defs>
+<linearGradient id="bg" gradientTransform="rotate(140 .5 .5)"><stop offset="0" stop-color="#F1DFC6"/><stop offset="1" stop-color="#C98B55"/></linearGradient>
+<radialGradient id="glow" cx=".5" cy=".42" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#3B2A1F" flood-opacity=".22"/></filter>
+</defs>
+<rect width="600" height="760" fill="url(#bg)"/>
+<circle cx="300.0" cy="342.0" r="252.0" fill="url(#glow)"/>
+<ellipse cx="300.0" cy="655.5" rx="161.5" ry="15.2" fill="#3B2A1F" opacity=".12"/>
+<g transform="translate(15.0 0.0) scale(0.95)" filter="url(#soft)"><path d="M212 214 L388 214 L414 628 L326 628 L300 340 L274 628 L186 628 Z" fill="#6B4A35"/>
+<rect x="212" y="214" width="176" height="30" fill="#FBF3E6" opacity=".35"/>
+<path d="M258 244 L262 330 M342 244 L338 330" stroke="#FBF3E6" stroke-width="3" opacity=".45"/>
+<path d="M300 244 L300 330" stroke="#FBF3E6" stroke-width="3" opacity=".6"/></g>
+</svg>

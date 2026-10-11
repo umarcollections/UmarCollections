@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" width="1200" height="1000" role="img" aria-label="Coat, tote and scarf">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBF3E6"/><stop offset=".55" stop-color="#F4A261"/><stop offset="1" stop-color="#E8803A"/></linearGradient>
+<radialGradient id="glow" cx=".42" cy=".38" r=".6"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#3B2A1F" flood-opacity=".22"/></filter>
+</defs>
+<rect width="1200" height="1000" fill="url(#bg)"/><circle cx="520" cy="420" r="420" fill="url(#glow)"/>
+<circle cx="900" cy="260" r="150" fill="#FBF3E6" opacity=".35"/>
+<g transform="translate(120 -60) scale(1.5)" filter="url(#soft)"><path d="M222 218 Q300 240 378 218 L458 262 L508 572 L462 588 L414 340 L414 622 L186 622 L186 340 L138 588 L92 572 L142 262 Z" fill="#A86A3C"/>
+<path d="M300 250 L300 622" stroke="#3B2A1F" stroke-width="4" opacity=".7"/>
+<path d="M258 222 L300 340 L342 222" fill="none" stroke="#3B2A1F" stroke-width="7" stroke-linejoin="round"/>
+<path d="M226 440 h46 M328 440 h46" stroke="#3B2A1F" stroke-width="4" opacity=".5"/>
+<g fill="#3B2A1F" opacity=".75"><circle cx="314" cy="380" r="6"/><circle cx="314" cy="450" r="6"/><circle cx="314" cy="520" r="6"/></g></g>
+<g transform="translate(700 30) scale(1.0)" filter="url(#soft)"><path d="M232 180 Q300 160 368 180 L380 300 Q300 340 220 300 Z" fill="#FBF3E6"/>
+<path d="M236 290 L208 632 L284 632 L300 320 Z" fill="#FBF3E6"/><path d="M364 290 L330 600 L398 600 L372 300 Z" fill="#FBF3E6" opacity=".9"/>
+<g stroke="#A86A3C" stroke-width="3" opacity=".6"><path d="M214 632 v26 M232 632 v26 M250 632 v26 M268 632 v26 M336 600 v26 M354 600 v26 M372 600 v26 M390 600 v26"/></g>
+<g stroke="#A86A3C" stroke-width="3" opacity=".25"><path d="M246 380 L280 380 M240 440 L276 440 M234 500 L272 500 M228 560 L268 560"/></g></g>
+<g transform="translate(560 240) scale(1.15)" filter="url(#soft)"><path d="M238 340 Q238 210 300 210 Q362 210 362 340" fill="none" stroke="#C98B55" stroke-width="12" stroke-linecap="round"/>
+<path d="M186 330 L414 330 L436 628 L164 628 Z" fill="#3B2A1F"/>
+<path d="M186 330 L414 330 L417 372 L183 372 Z" fill="#C98B55" opacity=".18"/></g>
+</svg>

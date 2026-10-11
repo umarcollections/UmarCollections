@@ -59,3 +59,34 @@ describe('cookie session', () => {
     expect(me.status).toBe(401);
   });
 });
+
+describe('GET /api/auth/session', () => {
+  it('returns the signed-in user', async () => {
+    const { agent, user } = await loggedInAgent();
+    const res = await agent.get('/api/auth/session');
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.email).toBe(user.email);
+    expect(res.body.data.password).toBeUndefined();
+  });
+
+  it('answers guests and bad tokens with data: null instead of a 401', async () => {
+    const guest = await request(app).get('/api/auth/session');
+    const invalid = await request(app)
+      .get('/api/auth/session')
+      .set('Authorization', 'Bearer not-a-jwt');
+
+    expect(guest.status).toBe(200);
+    expect(guest.body).toEqual({ success: true, data: null });
+    expect(invalid.status).toBe(200);
+    expect(invalid.body.data).toBeNull();
+  });
+
+  it('returns null once the user has logged out', async () => {
+    const { agent } = await loggedInAgent();
+    await agent.post('/api/auth/logout').set(CSRF);
+
+    const res = await agent.get('/api/auth/session');
+    expect(res.body.data).toBeNull();
+  });
+});

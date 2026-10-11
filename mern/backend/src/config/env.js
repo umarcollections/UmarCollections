@@ -30,7 +30,33 @@ const env = {
     .filter(Boolean),
   // Number of proxy hops to trust (0 = none), see app.js
   trustProxy: Number(process.env.TRUST_PROXY) || 0,
+  // Product photos and payment screenshots are stored on Cloudinary. Optional:
+  // without these the API runs and uploads answer 503 until they are added.
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME?.trim(),
+    apiKey: process.env.CLOUDINARY_API_KEY?.trim(),
+    apiSecret: process.env.CLOUDINARY_API_SECRET?.trim(),
+  },
+  // The store owner's login. On startup this account is created, or made an
+  // admin with this password if it already exists (see utils/auth/seedAdmin.js).
+  admin: {
+    email: process.env.ADMIN_EMAIL?.trim().toLowerCase(),
+    password: process.env.ADMIN_PASSWORD,
+  },
 };
+
+env.cloudinary.enabled = Boolean(
+  env.cloudinary.cloudName && env.cloudinary.apiKey && env.cloudinary.apiSecret
+);
+
+if (Boolean(env.admin.email) !== Boolean(env.admin.password)) {
+  console.error('Set both ADMIN_EMAIL and ADMIN_PASSWORD, or neither');
+  process.exit(1);
+}
+if (env.admin.password && (env.admin.password.length < 8 || env.admin.password.length > 72)) {
+  console.error('ADMIN_PASSWORD must be 8 to 72 characters');
+  process.exit(1);
+}
 
 env.isDev = env.nodeEnv === 'development';
 env.isTest = env.nodeEnv === 'test';

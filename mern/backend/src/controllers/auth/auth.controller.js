@@ -21,17 +21,26 @@ export const signup = async (req, res) => {
   sendAuthResponse(res, 201, user);
 };
 
-// POST /api/auth/login
-export const login = async (req, res) => {
-  const { email, password } = req.body;
-
+// Same message for every failure so emails (and which accounts are admins) can't be probed
+const findUserByCredentials = async ({ email, password }) => {
   const user = await User.findOne({ email }).select('+password');
-
-  // Same message for both cases so emails can't be probed
   if (!user || !user.password || !(await user.comparePassword(password))) {
     throw new ApiError(401, 'Invalid email or password');
   }
+  return user;
+};
 
+// POST /api/auth/login
+export const login = async (req, res) => {
+  const user = await findUserByCredentials(req.body);
+  sendAuthResponse(res, 200, user);
+};
+
+// POST /api/auth/admin/login
+// Only admins get a session here, so the admin sign-in never logs a customer in
+export const adminLogin = async (req, res) => {
+  const user = await findUserByCredentials(req.body);
+  if (user.role !== 'admin') throw new ApiError(401, 'Invalid email or password');
   sendAuthResponse(res, 200, user);
 };
 
@@ -45,4 +54,11 @@ export const logout = async (req, res) => {
 // GET /api/auth/me (protected)
 export const getMe = async (req, res) => {
   res.json({ success: true, data: req.user, session: { expiresAt: req.auth.expiresAt } });
+};
+
+// GET /api/auth/session (open to guests)
+// Lets the client ask "who is signed in?" on every page load: a guest gets
+// data: null instead of a 401, which browsers would log as an error
+export const getSession = async (req, res) => {
+  res.json({ success: true, data: req.user ?? null });
 };

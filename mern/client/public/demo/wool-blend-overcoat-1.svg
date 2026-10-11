@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800" role="img" aria-label="wool blend overcoat">
+<defs>
+<linearGradient id="bg" gradientTransform="rotate(35 .5 .5)"><stop offset="0" stop-color="#C98B55"/><stop offset="1" stop-color="#A86A3C"/></linearGradient>
+<radialGradient id="glow" cx=".5" cy=".42" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#3B2A1F" flood-opacity=".22"/></filter>
+</defs>
+<rect width="600" height="800" fill="url(#bg)"/>
+<circle cx="300.0" cy="360.0" r="252.0" fill="url(#glow)"/>
+<ellipse cx="300.0" cy="690.0" rx="170.0" ry="16.0" fill="#3B2A1F" opacity=".12"/>
+<g transform="translate(0.0 0.0) scale(1.0)" filter="url(#soft)"><path d="M222 218 Q300 240 378 218 L458 262 L508 572 L462 588 L414 340 L414 622 L186 622 L186 340 L138 588 L92 572 L142 262 Z" fill="#FBF3E6"/>
+<path d="M300 250 L300 622" stroke="#6B4A35" stroke-width="4" opacity=".7"/>
+<path d="M258 222 L300 340 L342 222" fill="none" stroke="#6B4A35" stroke-width="7" stroke-linejoin="round"/>
+<path d="M226 440 h46 M328 440 h46" stroke="#6B4A35" stroke-width="4" opacity=".5"/>
+<g fill="#6B4A35" opacity=".75"><circle cx="314" cy="380" r="6"/><circle cx="314" cy="450" r="6"/><circle cx="314" cy="520" r="6"/></g></g>
+</svg>

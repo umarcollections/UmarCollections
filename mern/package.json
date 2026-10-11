@@ -12,6 +12,7 @@
     "build": "npm run build --prefix client",
     "lint": "npm run lint --prefix backend && npm run lint --prefix client",
     "make-admin": "npm run make-admin --prefix backend --",
+    "seed:demo": "npm run seed:demo --prefix backend --",
     "test": "npm test --prefix backend",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

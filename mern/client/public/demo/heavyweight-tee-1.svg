@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800" role="img" aria-label="heavyweight tee">
+<defs>
+<linearGradient id="bg" gradientTransform="rotate(45 .5 .5)"><stop offset="0" stop-color="#F4A261"/><stop offset="1" stop-color="#C98B55"/></linearGradient>
+<radialGradient id="glow" cx=".5" cy=".42" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#3B2A1F" flood-opacity=".22"/></filter>
+</defs>
+<rect width="600" height="800" fill="url(#bg)"/>
+<circle cx="300.0" cy="360.0" r="252.0" fill="url(#glow)"/>
+<ellipse cx="300.0" cy="690.0" rx="170.0" ry="16.0" fill="#3B2A1F" opacity=".12"/>
+<g transform="translate(0.0 0.0) scale(1.0)" filter="url(#soft)"><path d="M200 232 Q300 262 400 232 L486 300 L446 370 L404 342 L404 612 Q300 626 196 612 L196 342 L154 370 L114 300 Z" fill="#FBF3E6"/>
+<path d="M252 226 Q300 268 348 226" fill="none" stroke="#6B4A35" stroke-width="6"/></g>
+</svg>

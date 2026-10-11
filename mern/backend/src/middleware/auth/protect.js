@@ -6,7 +6,7 @@ import { AUTH_COOKIE } from '../../utils/auth/authCookie.js';
 
 // Browsers send the JWT in the httpOnly auth cookie. Other clients
 // (mobile apps, Postman, tests) can send "Authorization: Bearer <token>".
-const getToken = (req) => {
+export const getToken = (req) => {
   const cookieToken = req.cookies?.[AUTH_COOKIE];
   if (cookieToken) return cookieToken;
 

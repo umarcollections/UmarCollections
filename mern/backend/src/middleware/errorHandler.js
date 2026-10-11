@@ -1,4 +1,5 @@
 import env from '../config/env.js';
+import { MAX_IMAGE_MB } from './upload.js';
 
 // Central error handler. Express 5 forwards errors thrown in async
 // controllers here automatically, so controllers need no try/catch.
@@ -24,6 +25,15 @@ const errorHandler = (err, req, res, next) => {
   if (err.code === 11000) {
     statusCode = 409;
     message = `${Object.keys(err.keyValue).join(', ')} already exists`;
+  }
+
+  // Upload rejected by multer (too large, too many files, wrong field name)
+  if (err.name === 'MulterError') {
+    statusCode = 400;
+    message =
+      err.code === 'LIMIT_FILE_SIZE'
+        ? `Each image must be ${MAX_IMAGE_MB} MB or smaller`
+        : err.message;
   }
 
   // Malformed JSON body

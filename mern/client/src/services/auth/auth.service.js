@@ -9,7 +9,12 @@ export const signupRequest = (payload) =>
 export const loginRequest = (payload) =>
   request('/auth/login', { method: 'POST', body: payload, notifyUnauthorized: false });
 
+// Only succeeds for admin accounts
+export const adminLoginRequest = (payload) =>
+  request('/auth/admin/login', { method: 'POST', body: payload, notifyUnauthorized: false });
+
 export const logoutRequest = () =>
   request('/auth/logout', { method: 'POST', notifyUnauthorized: false });
 
-export const getMeRequest = () => request('/auth/me', { notifyUnauthorized: false });
+// Resolves to { data: user } when signed in and { data: null } for a guest
+export const getSessionRequest = () => request('/auth/session');
