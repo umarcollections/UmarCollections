@@ -99,7 +99,8 @@ const StoreLayout = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-paper text-espresso-900">
+    // The paper background comes from body, so it is painted once
+    <div className="flex min-h-screen flex-col text-espresso-900">
       <a
         href="#main"
         onClick={skipToContent}

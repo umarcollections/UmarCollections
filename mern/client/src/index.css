@@ -63,6 +63,12 @@
     radial-gradient(circle at 0% 0%, rgb(230 201 163 / 0.5), transparent 50%),
     radial-gradient(circle at 100% 60%, rgb(244 162 97 / 0.18), transparent 45%);
   background-attachment: scroll, fixed, fixed;
+
+  /* A fixed background repaints the whole screen on every scroll frame, which
+     stutters on phones and tablets (iOS ignores it anyway), so there it scrolls */
+  @media (pointer: coarse) {
+    background-attachment: scroll;
+  }
 }
 
 @utility text-ember {
@@ -84,5 +90,15 @@
 
   body {
     @apply bg-paper font-sans text-espresso-800 antialiased;
+  }
+}
+
+/* iPhones zoom into any field with text under 16px when it is tapped, and the
+   page stays zoomed. Outside the layers so it wins over a field's text-sm. */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
   }
 }

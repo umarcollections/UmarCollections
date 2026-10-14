@@ -32,7 +32,8 @@ const ProductGallery = ({ images, title }) => {
   }
 
   return (
-    <div className="space-y-4">
+    // min-w-0 lets the thumbnail strip scroll instead of widening the page
+    <div className="min-w-0 space-y-4">
       <div
         ref={frame}
         data-reveal-img
@@ -47,9 +48,11 @@ const ProductGallery = ({ images, title }) => {
         />
       </div>
       {images.length > 1 && (
-        <ul className="flex gap-3">
+        // A product can have up to 10 photos: on phones the thumbnails swipe
+        // sideways, wider screens wrap them. The padding keeps the ring visible.
+        <ul className="-m-1 flex snap-x gap-3 overflow-x-auto overscroll-x-contain p-1 sm:flex-wrap sm:overflow-visible">
           {images.map((image, i) => (
-            <li key={image._id} className="w-20 sm:w-24">
+            <li key={image._id} className="w-20 shrink-0 snap-start sm:w-24">
               <button
                 type="button"
                 onClick={() => setIndex(i)}

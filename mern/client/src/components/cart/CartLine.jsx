@@ -64,7 +64,7 @@ const CartLine = ({ line, item, onQuantity, onRemove, onNavigate, compact = fals
             <button
               type="button"
               onClick={() => onQuantity(line.stock)}
-              className="text-xs font-semibold text-espresso-900 underline underline-offset-4"
+              className="-my-2 py-2 text-xs font-semibold text-espresso-900 underline underline-offset-4"
             >
               Change to {line.stock}
             </button>
@@ -72,7 +72,7 @@ const CartLine = ({ line, item, onQuantity, onRemove, onNavigate, compact = fals
           <button
             type="button"
             onClick={onRemove}
-            className="text-xs text-espresso-700 underline underline-offset-4 hover:text-espresso-900"
+            className="-my-2 py-2 text-xs text-espresso-700 underline underline-offset-4 hover:text-espresso-900"
           >
             Remove
           </button>

@@ -28,7 +28,7 @@ const DiscountCodeForm = ({ discount, discountError }) => {
             type="button"
             onClick={() => setDiscountCode('')}
             aria-label="Remove discount code"
-            className="text-espresso-700 underline underline-offset-4 hover:text-espresso-900"
+            className="-my-2 py-2 text-espresso-700 underline underline-offset-4 hover:text-espresso-900"
           >
             Remove
           </button>

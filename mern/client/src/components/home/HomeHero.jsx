@@ -69,14 +69,16 @@ const HomeHero = ({ settings, categories, newest }) => {
       ref={hero}
       className="relative -mt-16 overflow-hidden bg-glow pt-16 lg:-mt-20 lg:pt-20"
     >
+      {/* Soft gradients rather than blurred circles: a blur filter on something
+          that keeps moving is too heavy for phones */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div
           data-orb
-          className="absolute -left-32 top-10 size-[28rem] rounded-full bg-cream-50/60 blur-3xl"
+          className="absolute -left-40 top-2 size-[32rem] bg-radial from-cream-50/60 to-transparent to-70%"
         />
         <div
           data-orb
-          className="absolute -right-24 bottom-0 size-[32rem] rounded-full bg-tangerine-400/40 blur-3xl"
+          className="absolute -right-32 -bottom-8 size-[36rem] bg-radial from-tangerine-400/40 to-transparent to-70%"
         />
       </div>
 

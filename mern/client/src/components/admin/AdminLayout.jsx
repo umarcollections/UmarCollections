@@ -88,13 +88,13 @@ const AdminLayout = () => {
           aria-expanded={menuOpen}
           aria-controls="admin-nav"
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-          className="grid size-10 place-items-center rounded-lg hover:bg-white/10 lg:hidden"
+          className="grid size-10 shrink-0 place-items-center rounded-lg hover:bg-white/10 lg:hidden"
         >
           <AdminIcon name={menuOpen ? 'close' : 'menu'} />
         </button>
         <Link
           to="/admin/orders"
-          className="flex items-center gap-3 whitespace-nowrap rounded-lg py-2 font-display text-lg font-semibold uppercase tracking-[0.16em] text-cream-50 sm:text-xl"
+          className="flex items-center gap-3 whitespace-nowrap rounded-lg py-2 font-display text-xs font-semibold uppercase tracking-[0.08em] text-cream-50 min-[360px]:text-sm min-[360px]:tracking-[0.1em] min-[380px]:text-base min-[380px]:tracking-[0.12em] sm:text-xl sm:tracking-[0.16em]"
         >
           <Wordmark />
           <span className="hidden rounded-full bg-white/10 px-2.5 py-0.5 font-sans text-[10px] font-semibold tracking-[0.2em] text-caramel-300 sm:inline">

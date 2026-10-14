@@ -137,7 +137,7 @@ const StoreHeader = () => {
         <Link
           to="/"
           onClick={closeMenu}
-          className="relative z-10 whitespace-nowrap font-display text-sm font-semibold uppercase tracking-[0.1em] text-espresso-900 min-[380px]:text-base min-[380px]:tracking-[0.12em] sm:text-2xl sm:tracking-[0.22em] lg:text-3xl"
+          className="relative z-10 whitespace-nowrap py-2 font-display text-sm font-semibold uppercase tracking-[0.1em] text-espresso-900 min-[380px]:text-base min-[380px]:tracking-[0.12em] sm:text-2xl sm:tracking-[0.22em] lg:text-3xl"
         >
           <Wordmark />
         </Link>
@@ -205,7 +205,7 @@ const StoreHeader = () => {
           <Link
             to={account.to}
             onClick={closeMenu}
-            className="mt-10 inline-block text-xs font-semibold uppercase tracking-[0.22em] text-espresso-900 underline underline-offset-8"
+            className="mt-7 inline-block py-3 text-xs font-semibold uppercase tracking-[0.22em] text-espresso-900 underline underline-offset-8"
           >
             {account.label}
           </Link>
