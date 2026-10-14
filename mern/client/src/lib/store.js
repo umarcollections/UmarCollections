@@ -1,7 +1,10 @@
 // Store details shown across the site, including the Privacy Policy and Terms.
-// Keep the <title> in client/index.html in step with the name.
+// Keep in step with backend/src/config/store.js, which also sets what search
+// engines see for each page.
 const store = {
   name: 'Umar Collections',
+  // Follows the store name in the home page title
+  tagline: 'Clothing, Bags & Shoes in Faisalabad',
   email: 'umarcollections.store@gmail.com',
   // The only city we deliver to
   city: 'Faisalabad',
@@ -11,9 +14,6 @@ const store = {
   // ISO 4217 code used for every price on the site
   currency: 'PKR',
   locale: 'en-PK',
-  // Search result text for pages without their own; keep in step with client/index.html
-  description:
-    'Clothing, knitwear and bags for everyday wear from Umar Collections, Faisalabad. Delivery within Faisalabad, pay by bank transfer.',
 };
 
 // Digits only, for tel: and wa.me links

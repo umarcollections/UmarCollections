@@ -4,29 +4,41 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Keep in step with name in src/lib/store.js; pages set their own titles -->
-    <title>Umar Collections</title>
-    <!-- Keep the description in step with description in src/lib/store.js -->
+    <meta name="theme-color" content="#fbf3e6" />
+    <meta property="og:site_name" content="Umar Collections" />
+    <meta property="og:locale" content="en_PK" />
+    <!-- The home page's tags. On the live site the server swaps everything
+         between page-meta and /page-meta for each page's own title,
+         description, link preview and structured data
+         (backend/src/controllers/seo/page.controller.js). Keep the title and
+         description in step with backend/src/config/store.js.
+         %SITE_URL% is filled in at build time (see vite.config.js), since
+         link previews need full addresses. -->
+    <!-- page-meta -->
+    <title>Umar Collections: Clothing, Bags &amp; Shoes in Faisalabad</title>
     <meta
       name="description"
-      content="Clothing, knitwear and bags for everyday wear from Umar Collections, Faisalabad. Delivery within Faisalabad, pay by bank transfer."
+      content="Umar Collections is an online clothing store in Faisalabad. Shop shirts, trousers, knitwear, jackets, bags, shoes and accessories, delivered to your door."
     />
-    <meta name="theme-color" content="#fbf3e6" />
-    <!-- Link previews on WhatsApp, Facebook and X. %SITE_URL% is filled in at
-         build time (see vite.config.js), since previews need full addresses. -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Umar Collections" />
-    <meta property="og:title" content="Umar Collections" />
+    <meta
+      property="og:title"
+      content="Umar Collections: Clothing, Bags &amp; Shoes in Faisalabad"
+    />
     <meta
       property="og:description"
-      content="Clothing, knitwear and bags for everyday wear from Umar Collections, Faisalabad. Delivery within Faisalabad, pay by bank transfer."
+      content="Umar Collections is an online clothing store in Faisalabad. Shop shirts, trousers, knitwear, jackets, bags, shoes and accessories, delivered to your door."
     />
     <meta property="og:url" content="%SITE_URL%/" />
     <meta property="og:image" content="%SITE_URL%/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Umar Collections, clothing and bags from Faisalabad" />
+    <meta
+      property="og:image:alt"
+      content="Umar Collections, clothing, bags and shoes in Faisalabad"
+    />
     <meta name="twitter:card" content="summary_large_image" />
+    <!-- /page-meta -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

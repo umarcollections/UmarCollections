@@ -47,6 +47,8 @@ const env = {
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : '')
   ).replace(/\/$/, ''),
+  // Set by Vercel on its servers (see utils/seo/pageTemplate.js)
+  isVercel: Boolean(process.env.VERCEL),
   // New-order alerts to the owner's WhatsApp through CallMeBot. Optional:
   // without both values no alerts are sent.
   whatsappAlerts: {

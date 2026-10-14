@@ -2,8 +2,9 @@ import { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
-// Large photo with thumbnails; switching photos crossfades with a slight zoom
-const ProductGallery = ({ images }) => {
+// Large photo with thumbnails; switching photos crossfades with a slight zoom.
+// title describes photos the admin left without their own description.
+const ProductGallery = ({ images, title }) => {
   const [index, setIndex] = useState(0);
   const frame = useRef(null);
   const current = images[index];
@@ -41,7 +42,7 @@ const ProductGallery = ({ images }) => {
           data-gallery-image
           key={current._id}
           src={current.url}
-          alt={current.alt}
+          alt={current.alt || title}
           className="size-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
         />
       </div>

@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
           <>
             <img
               src={image.url}
-              alt={image.alt}
+              alt={image.alt || product.title}
               loading="lazy"
               className="size-full object-cover transition duration-[1200ms] ease-out group-hover:scale-105"
             />

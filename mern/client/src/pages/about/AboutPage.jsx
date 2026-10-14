@@ -29,15 +29,15 @@ const PROMISES = [
 
 const AboutPage = () => {
   const page = useRef(null);
-  usePageTitle('About');
+  usePageTitle('About Us & Contact');
   useStoreMotion(page);
 
   return (
     <div ref={page}>
       <PageBanner
         eyebrow={`About ${store.name}`}
-        title="Clothing and bags chosen for everyday wear"
-        text="Shirts, trousers, knitwear, outerwear, bags and accessories, picked for how they feel and how long they last."
+        title="Clothing, bags and shoes chosen for everyday wear"
+        text={`${store.name} is an online clothing store in ${store.city}. Shirts, trousers, knitwear, outerwear, bags, shoes and accessories, picked for how they feel and how long they last.`}
       />
 
       <section className="mx-auto grid max-w-7xl items-center gap-14 px-4 py-24 sm:px-8 lg:grid-cols-2 lg:py-32">
@@ -46,11 +46,15 @@ const AboutPage = () => {
           <div className="mt-8 space-y-5 text-base leading-relaxed text-espresso-800">
             <p data-reveal>
               We keep the range small: linen and cotton shirts, easy trousers, soft knitwear, a few
-              coats and jackets, and leather and canvas bags.
+              coats and jackets, shoes, and leather and canvas bags.
             </p>
             <p data-reveal>
               Every product page shows what it is made of, how it fits and exactly which sizes are
               in stock right now.
+            </p>
+            <p data-reveal>
+              We are based in {store.city}. Order on this website as a guest or with an account, pay
+              by bank transfer, and we deliver to your door anywhere within {store.city}.
             </p>
           </div>
         </div>

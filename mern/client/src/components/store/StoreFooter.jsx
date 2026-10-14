@@ -19,8 +19,8 @@ const StoreFooter = () => {
               <Wordmark />
             </p>
             <p className="text-sm leading-relaxed text-cream-200/80">
-              Clothing, knitwear and bags for everyday wear. Sizes, fabrics and stock are listed on
-              every product page.
+              Clothing, bags, shoes and accessories for everyday wear, delivered within {store.city}
+              . Sizes, fabrics and stock are listed on every product page.
             </p>
           </div>
 
@@ -98,7 +98,7 @@ const StoreFooter = () => {
       </div>
       <div className="border-t border-white/10">
         <p className="mx-auto max-w-7xl px-4 py-6 text-xs text-cream-200/60 sm:px-8">
-          &copy; {new Date().getFullYear()} {store.name}. Prices in {store.currency}.
+          &copy; {new Date().getFullYear()} {store.name}, {store.city}. Prices in {store.currency}.
         </p>
       </div>
     </footer>

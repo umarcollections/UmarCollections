@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import env from './config/env.js';
 import routes from './routes/index.js';
 import seoRoutes from './routes/seo/seo.routes.js';
+import pageRoutes from './routes/seo/page.routes.js';
 import csrfProtection from './middleware/auth/csrf.js';
 import notFound from './middleware/notFound.js';
 import errorHandler from './middleware/errorHandler.js';
@@ -25,7 +26,7 @@ app.use(cookieParser());
 app.use(csrfProtection);
 
 // Health check
-app.get('/', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'API is running' });
 });
 
@@ -34,6 +35,9 @@ app.use(seoRoutes);
 
 // All API routes live under /api
 app.use('/api', routes);
+
+// Storefront pages (the client app, with each page's title and description)
+app.use(pageRoutes);
 
 // These two must stay last
 app.use(notFound);

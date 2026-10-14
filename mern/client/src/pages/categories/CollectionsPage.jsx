@@ -4,11 +4,12 @@ import PageBanner from '../../components/store/PageBanner.jsx';
 import useCategories from '../../hooks/categories/useCategories.js';
 import usePageTitle from '../../hooks/common/usePageTitle.js';
 import useStoreMotion from '../../hooks/common/useStoreMotion.js';
+import store from '../../lib/store.js';
 
 const CollectionsPage = () => {
   const page = useRef(null);
   const { data: categories, error, isPending } = useCategories();
-  usePageTitle('Collections');
+  usePageTitle('All Collections');
   useStoreMotion(page, [categories?.length]);
 
   return (
@@ -16,7 +17,7 @@ const CollectionsPage = () => {
       <PageBanner
         eyebrow="Collections"
         title="Find what you came for"
-        text="Every collection in the store. Pick one to see its pieces, sizes and what is in stock."
+        text={`Every collection at ${store.name}, with delivery within ${store.city}. Pick one to see its pieces, sizes and what is in stock.`}
       />
 
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-8">

@@ -21,10 +21,11 @@ const escapeXml = (text) =>
     (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[char]
   );
 
-const urlEntry = (loc, lastmod) =>
+// images: photos on the page, which helps them show in Google Images
+const urlEntry = (loc, lastmod, images = []) =>
   `  <url><loc>${escapeXml(loc)}</loc>${
     lastmod ? `<lastmod>${lastmod.toISOString().slice(0, 10)}</lastmod>` : ''
-  }</url>`;
+  }${images.map((image) => `<image:image><image:loc>${escapeXml(image)}</image:loc></image:image>`).join('')}</url>`;
 
 // GET /sitemap.xml
 // Built from live data, so new products and categories appear without a deploy
@@ -32,20 +33,26 @@ export const sitemap = async (req, res) => {
   const base = siteUrl(req);
   const [categories, products] = await Promise.all([
     Category.find().select('slug updatedAt').sort({ name: 1 }),
-    Product.find({ status: 'active' }).select('slug updatedAt').sort({ createdAt: -1 }),
+    Product.find({ status: 'active' }).select('slug updatedAt images').sort({ createdAt: -1 }),
   ]);
 
   const urls = [
     ...STATIC_PAGES.map((path) => urlEntry(`${base}${path}`)),
     ...categories.map((c) => urlEntry(`${base}/shop?category=${c.slug}`, c.updatedAt)),
-    ...products.map((p) => urlEntry(`${base}/products/${p.slug}`, p.updatedAt)),
+    ...products.map((p) =>
+      urlEntry(
+        `${base}/products/${p.slug}`,
+        p.updatedAt,
+        p.images.map((image) => (image.url.startsWith('/') ? `${base}${image.url}` : image.url))
+      )
+    ),
   ];
 
   res
     .type('application/xml')
     .set('Cache-Control', 'public, max-age=3600')
     .send(
-      `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`
+      `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urls.join('\n')}\n</urlset>\n`
     );
 };
 

@@ -4,11 +4,12 @@ import { useGSAP } from '@gsap/react';
 import { SplitText } from 'gsap/SplitText';
 import HeroNewInCard from './HeroNewInCard.jsx';
 import StoreButton from '../store/StoreButton.jsx';
+import store from '../../lib/store.js';
 
-// Wording used until the admin writes their own in Settings
-const DEFAULT_HEADING = 'Clothing and bags for every day';
-const DEFAULT_TEXT =
-  'Shirts, trousers, knitwear, outerwear, bags and accessories. Every product page lists the fabric, the sizes and what is in stock.';
+// Wording used until the admin writes their own in Settings. It names what
+// the store sells and where, which is what people search for.
+const DEFAULT_HEADING = `Clothing, bags and shoes in ${store.city}`;
+const DEFAULT_TEXT = `${store.name} is an online clothing store in ${store.city}. Shop shirts, trousers, knitwear, jackets, bags, shoes and accessories, with the fabric, sizes and stock listed on every product page.`;
 
 // Opening screen: the heading rises word by word, the artwork unmasks and
 // warm light drifts behind it. Render it once settings have loaded, so the

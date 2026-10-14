@@ -4,6 +4,7 @@ import CollectionTile from '../../components/categories/CollectionTile.jsx';
 import CategoryMarquee from '../../components/home/CategoryMarquee.jsx';
 import ClosingBand from '../../components/home/ClosingBand.jsx';
 import EditorialSplit from '../../components/home/EditorialSplit.jsx';
+import HomeFaq from '../../components/home/HomeFaq.jsx';
 import HomeHero from '../../components/home/HomeHero.jsx';
 import ProductGrid from '../../components/products/ProductGrid.jsx';
 import SectionHeading from '../../components/store/SectionHeading.jsx';
@@ -98,12 +99,10 @@ const HomePage = () => {
         </section>
       )}
 
+      <HomeFaq settings={settings} />
+
       {/* Rendered once the count is known, so its animated heading never changes text */}
-      {catalogue && (
-        <div className="pt-24">
-          <ClosingBand total={catalogue.pagination.total} />
-        </div>
-      )}
+      {catalogue && <ClosingBand total={catalogue.pagination.total} />}
     </div>
   );
 };

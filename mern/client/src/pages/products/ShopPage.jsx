@@ -7,12 +7,26 @@ import useCategories from '../../hooks/categories/useCategories.js';
 import usePageTitle from '../../hooks/common/usePageTitle.js';
 import useStoreMotion from '../../hooks/common/useStoreMotion.js';
 import useProducts from '../../hooks/products/useProducts.js';
+import store from '../../lib/store.js';
 
 const SORTS = [
   { value: 'newest', label: 'Newest' },
   { value: 'price-asc', label: 'Price, low to high' },
   { value: 'price-desc', label: 'Price, high to low' },
 ];
+
+// Same titles as the server sends (backend/src/controllers/seo/page.controller.js)
+const pageTitle = ({ q, category, page }) => {
+  if (q) return `Search: ${q}`;
+  const title = category
+    ? `Buy ${category.name} Online in ${store.city}`
+    : `Shop Online in ${store.city}: All Products`;
+  return Number.isInteger(page) && page > 1 ? `${title}, page ${page}` : title;
+};
+
+// "a, b and c"
+const listOf = (words) =>
+  words.length > 1 ? `${words.slice(0, -1).join(', ')} and ${words.at(-1)}` : (words[0] ?? '');
 
 const chipClass = (active) =>
   `rounded-full px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] transition ${
@@ -49,7 +63,12 @@ const ShopPage = () => {
   const currentCategory = categories.find((c) => c.slug === category);
   const heading = currentCategory?.name ?? 'All products';
   const products = data?.data ?? [];
-  usePageTitle(heading);
+  const intro =
+    currentCategory?.description ||
+    (!category &&
+      categories.length > 0 &&
+      `Shop ${listOf(categories.map((c) => c.name.toLowerCase()))} from ${store.name}, delivered within ${store.city}.`);
+  usePageTitle(pageTitle({ q, category: currentCategory, page }));
   // New results get their own entrance
   useStoreMotion(pageRef, [heading, products.map((p) => p._id).join()]);
 
@@ -60,7 +79,7 @@ const ShopPage = () => {
         key={heading}
         eyebrow={data ? `${data.pagination.total} pieces` : 'Shop'}
         title={heading}
-        text={currentCategory?.description}
+        text={intro}
       >
         <div data-reveal className="mt-10 flex flex-wrap gap-2">
           <button

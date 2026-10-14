@@ -1,16 +1,26 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 const matches = (variant, selected) =>
   variant.optionValues.every((value, i) => value === selected[i]);
 
-// Starts on the first variant in stock, so the page doesn't open on a sold-out size
-const initialSelection = (variants) =>
-  (variants.find((variant) => variant.stock > 0) ?? variants[0]).optionValues;
+// A link with ?variant=<id> opens on that variant (search results link to each
+// size and colour this way). Otherwise the page starts on the first variant in
+// stock, so it doesn't open on a sold-out size.
+const initialSelection = (variants, linkedId) =>
+  (
+    variants.find((variant) => variant._id === linkedId) ??
+    variants.find((variant) => variant.stock > 0) ??
+    variants[0]
+  ).optionValues;
 
 // Which option values the shopper has picked, and the variant they add up to
 const useVariantSelection = (product) => {
   const { variants } = product;
-  const [selected, setSelected] = useState(() => initialSelection(variants));
+  const [searchParams] = useSearchParams();
+  const [selected, setSelected] = useState(() =>
+    initialSelection(variants, searchParams.get('variant'))
+  );
   const variant = variants.find((v) => matches(v, selected)) ?? null;
 
   const withValue = (index, value) => selected.map((v, i) => (i === index ? value : v));

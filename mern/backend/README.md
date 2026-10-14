@@ -50,9 +50,10 @@ The "V" is the React app in `../client`: this API only returns JSON.
 
 | Method | URL                       | Access    | Action                     |
 | ------ | ------------------------- | --------- | -------------------------- |
-| GET    | /                         | public    | health check               |
+| GET    | /api/health               | public    | health check               |
 | GET    | /sitemap.xml              | public    | pages for search engines   |
 | GET    | /robots.txt               | public    | crawler rules + sitemap    |
+| GET    | any other non-API path    | public    | storefront page (SEO tags) |
 | POST   | /api/auth/signup          | public    | create account, set cookie |
 | POST   | /api/auth/login           | public    | log in, set cookie         |
 | POST   | /api/auth/admin/login     | public    | log in, admins only        |

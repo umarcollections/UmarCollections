@@ -40,7 +40,7 @@ const ProductDetails = ({ product }) => {
 
   return (
     <div className="grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-      <ProductGallery images={product.images} />
+      <ProductGallery images={product.images} title={product.title} />
 
       <div className="lg:sticky lg:top-28 lg:self-start">
         <nav data-reveal aria-label="Breadcrumb" className="text-xs text-espresso-700">

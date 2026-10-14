@@ -144,10 +144,11 @@ can't add without passing CORS. `services/api.js` does this for you.
 ## Deploying to Vercel
 
 One Vercel project serves both halves: the built client from `client/dist`, and the
-Express API as a single function in `api/index.js`. `vercel.json` sends `/api/*`,
-`/sitemap.xml` and `/robots.txt` to that function and every other path to the
-client. Because the shop and the API share one address, the login cookie stays
-first-party and no CORS or cookie settings are needed.
+Express app as a single function in `api/index.js`. Built files (scripts, styles,
+images) come straight from Vercel's CDN; `vercel.json` sends every other address to
+the function: the API, `/sitemap.xml`, `/robots.txt` and the storefront pages (see
+[Search engines](#search-engines-seo)). Because the shop and the API share one
+address, the login cookie stays first-party and no CORS or cookie settings are needed.
 
 1. Push the repo to GitHub and import it in Vercel. Leave the root directory as the
    repo root; `vercel.json` sets the install, build and output settings.
@@ -171,6 +172,7 @@ first-party and no CORS or cookie settings are needed.
    | `CALLMEBOT_API_KEY`     | from CallMeBot (see below)                               |
    | `RESEND_API_KEY`        | from Resend, for emails (see below)                      |
    | `EMAIL_FROM`            | only after verifying a domain in Resend (see below)      |
+   | `SITE_URL`              | the address people use, e.g. `https://example.com`       |
 
    Make a `JWT_SECRET` with:
    `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`
@@ -179,8 +181,12 @@ first-party and no CORS or cookie settings are needed.
 
 Notes:
 
-- `SITE_URL` and `CLIENT_URL` aren't needed on Vercel: the production domain is picked
-  up automatically, including a custom domain added later in Vercel's Domains settings.
+- `SITE_URL` is the one address search engines are told to list (canonical links,
+  sitemap, link previews). Without it Vercel's own `<project>.vercel.app` domain is
+  used, which is wrong if that domain redirects to another one, so set it to the
+  address in the browser bar, with `https://` and no trailing slash, and redeploy
+  (the client reads it at build time). Change it when you add a custom domain.
+- `CLIENT_URL` isn't needed on Vercel: the shop and the API share one address.
 - The function runs in Mumbai (`regions: ["bom1"]` in `vercel.json`), next to the
   Atlas cluster (AWS ap-south-1). If the database moves, move the region with it.
 - Each upload must stay under Vercel's 4.5 MB request limit, so images are capped at
@@ -199,8 +205,33 @@ Notes:
   the Resend account's own address. After verifying (Resend, Domains), set
   `EMAIL_FROM`, e.g. `Umar Collections <orders@umarcollections.pk>`. A failed email
   is logged and never fails the order.
-- Link previews (WhatsApp, Facebook) show `client/public/og-image.jpg` for every page.
-  The site is a single-page app, so pages can't have their own preview.
+- Link previews (WhatsApp, Facebook) show the product's first photo on product pages
+  and `client/public/og-image.jpg` everywhere else.
+
+## Search engines (SEO)
+
+Storefront pages are served by the API (`backend/src/controllers/seo/page.controller.js`)
+as the built `client/dist/index.html` with that page's own head tags, so Google, Bing,
+AI search tools and link previews see them without running the app:
+
+- title, description and canonical address for every page; the app sets the same
+  titles in the browser, so keep the two in step
+- `noindex` on cart, checkout, orders, account, login and admin pages and on search
+  results; a real 404 for unknown pages and products that are drafts or deleted
+- structured data: site name (with the spellings in `alternateName`), the store's
+  address and phone, breadcrumbs, and each product's price, sale price and stock.
+  A product with sizes or colours lists each one with its own link (`?variant=<id>`)
+- `/sitemap.xml` with every collection, product and product photo, built from live data
+
+Store facts used for this are in `backend/src/config/store.js`. Add the store's
+Instagram, Facebook or TikTok links to `profiles` there so Google connects them to
+the site.
+
+After deploying: in [Google Search Console](https://search.google.com/search-console)
+add the site as a URL-prefix property, verify it with the HTML file Google gives you
+(put it in `client/public/` and redeploy), submit `<SITE_URL>/sitemap.xml`, and check
+product pages with the [Rich Results Test](https://search.google.com/test/rich-results).
+Bing Webmaster Tools can import the site from Search Console.
 
 Other hosts: run `npm start` for the API and serve `client/dist`, keeping both on one
 site (or set `COOKIE_SAMESITE=none` if they are on different sites). Set `SITE_URL`,
