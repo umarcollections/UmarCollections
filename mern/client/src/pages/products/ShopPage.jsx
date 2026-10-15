@@ -108,7 +108,8 @@ const ShopPage = () => {
               page: '',
             })
           }
-          className="rounded-full border border-caramel-300 bg-cream-50 px-5 py-3 text-sm normal-case tracking-normal text-espresso-900 outline-none transition focus:border-caramel-500 focus:bg-white focus:ring-4 focus:ring-caramel-400/20"
+          // Phones and tablets get a compact pill so sorting doesn't outweigh the search
+          className="min-w-52 rounded-full border border-caramel-300 bg-cream-50 px-5 py-3 text-sm normal-case tracking-normal text-espresso-900 outline-none transition focus:border-caramel-500 focus:bg-white focus:ring-4 focus:ring-caramel-400/20 max-lg:min-w-48 max-lg:px-4 max-lg:py-2 max-lg:font-medium max-lg:[&::picker-icon]:text-[0.6rem]"
         >
           {SORTS.map((option) => (
             <option key={option.value} value={option.value}>

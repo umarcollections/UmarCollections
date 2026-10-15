@@ -91,6 +91,48 @@
   body {
     @apply bg-paper font-sans text-espresso-800 antialiased;
   }
+
+  /* Dropdown lists in the store's colours. Chrome and Edge can style the open
+     list; Safari and Firefox keep their own (the wheel on iPhones). */
+  @supports (appearance: base-select) {
+    select,
+    ::picker(select) {
+      appearance: base-select;
+    }
+
+    select {
+      @apply inline-flex items-center justify-between gap-3;
+    }
+
+    select::picker-icon {
+      @apply text-espresso-700 transition-transform duration-200;
+    }
+
+    select:open::picker-icon {
+      rotate: 180deg;
+    }
+
+    ::picker(select) {
+      @apply my-1.5 rounded-2xl border border-caramel-300 bg-cream-50 p-1.5 shadow-xl shadow-espresso-900/15;
+    }
+
+    select option {
+      @apply cursor-pointer rounded-xl px-3.5 py-2 text-espresso-900;
+    }
+
+    select option:hover,
+    select option:focus-visible {
+      @apply bg-cream-200 outline-none;
+    }
+
+    select option:checked {
+      @apply bg-espresso-900 font-semibold text-cream-50;
+    }
+
+    select option::checkmark {
+      display: none;
+    }
+  }
 }
 
 /* iPhones zoom into any field with text under 16px when it is tapped, and the

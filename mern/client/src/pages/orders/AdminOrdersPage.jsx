@@ -72,7 +72,7 @@ const AdminOrdersPage = () => {
           id="order-status"
           value={status}
           onChange={(event) => updateParams({ status: event.target.value, page: '' })}
-          className={CONTROL_CLASS}
+          className={`min-w-50 ${CONTROL_CLASS}`}
         >
           {STATUS_FILTERS.map((filter) => (
             <option key={filter.value} value={filter.value}>

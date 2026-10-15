@@ -67,7 +67,7 @@ const AdminProductsPage = () => {
           id="status-filter"
           value={status}
           onChange={(event) => updateParams({ status: event.target.value, page: '' })}
-          className="rounded-lg border border-caramel-300 bg-white px-3 py-2 text-sm outline-none focus:border-caramel-500 focus:ring-1 focus:ring-caramel-500"
+          className="min-w-36 rounded-lg border border-caramel-300 bg-white px-3 py-2 text-sm outline-none focus:border-caramel-500 focus:ring-1 focus:ring-caramel-500"
         >
           <option value="">All statuses</option>
           {PRODUCT_STATUSES.map((value) => (
