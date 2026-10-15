@@ -1,14 +1,18 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Pagination from '../../components/common/Pagination.jsx';
 import ProductGrid from '../../components/products/ProductGrid.jsx';
 import PageBanner from '../../components/store/PageBanner.jsx';
+import StoreIcon from '../../components/store/StoreIcon.jsx';
 import useCategories from '../../hooks/categories/useCategories.js';
 import usePageTitle from '../../hooks/common/usePageTitle.js';
 import useMediaQuery from '../../hooks/common/useMediaQuery.js';
 import useStoreMotion from '../../hooks/common/useStoreMotion.js';
 import useProducts from '../../hooks/products/useProducts.js';
 import store from '../../lib/store.js';
+
+// How long typing has to pause before the list updates
+const SEARCH_DELAY_MS = 250;
 
 const SORTS = [
   { value: 'newest', label: 'Newest' },
@@ -45,6 +49,20 @@ const ShopPage = () => {
   const sort = searchParams.get('sort') ?? 'newest';
   const page = Number(searchParams.get('page')) || 1;
 
+  // The search box filters the list as the visitor types: the text shows at
+  // once, and the address (?q=) follows when typing pauses. sentQ is the last
+  // search this box made; any other change of q (Back, the header search,
+  // Clear filters) is copied into the box.
+  const [term, setTerm] = useState(q);
+  const [sentQ, setSentQ] = useState(q);
+  if (q !== sentQ) {
+    setSentQ(q);
+    setTerm(q);
+  }
+  const searchTimer = useRef();
+  const searchInput = useRef(null);
+  useEffect(() => () => clearTimeout(searchTimer.current), []);
+
   const { data: categories = [] } = useCategories();
   const { data, error, isPending, isFetching } = useProducts({ q, category, sort, page });
 
@@ -56,9 +74,40 @@ const ShopPage = () => {
     setSearchParams(next);
   };
 
+  // replace: a search per pause in typing would otherwise fill the Back button
+  const runSearch = (value) => {
+    clearTimeout(searchTimer.current);
+    const next = value.trim();
+    setSentQ(next);
+    setSearchParams(
+      (current) => {
+        const params = new URLSearchParams(current);
+        if (next) params.set('q', next);
+        else params.delete('q');
+        params.delete('page');
+        return params;
+      },
+      { replace: true }
+    );
+  };
+
+  const handleTyping = (event) => {
+    const { value } = event.target;
+    setTerm(value);
+    clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => runSearch(value), SEARCH_DELAY_MS);
+  };
+
+  // Enter searches straight away
   const handleSearch = (event) => {
     event.preventDefault();
-    updateParams({ q: event.currentTarget.elements.q.value.trim(), page: '' });
+    runSearch(term);
+  };
+
+  const clearSearch = () => {
+    setTerm('');
+    runSearch('');
+    searchInput.current?.focus();
   };
 
   const currentCategory = categories.find((c) => c.slug === category);
@@ -81,21 +130,32 @@ const ShopPage = () => {
         <label htmlFor="shop-search" className="sr-only">
           Search products
         </label>
+        <StoreIcon
+          name="search"
+          className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-espresso-700"
+        />
         <input
+          ref={searchInput}
           id="shop-search"
           name="q"
           type="search"
-          defaultValue={q}
-          key={q}
+          enterKeyHint="search"
+          autoComplete="off"
+          value={term}
+          onChange={handleTyping}
           placeholder="Search products"
-          className="w-full rounded-full border border-caramel-300 bg-cream-50 px-6 py-3.5 pr-28 text-sm text-espresso-900 outline-none transition placeholder:text-espresso-700/50 focus:border-caramel-500 focus:bg-white focus:ring-4 focus:ring-caramel-400/20"
+          className="w-full rounded-full border border-caramel-300 bg-cream-50 py-3.5 pl-13 pr-14 text-sm text-espresso-900 outline-none transition placeholder:text-espresso-700/50 focus:border-caramel-500 focus:bg-white focus:ring-4 focus:ring-caramel-400/20 [&::-webkit-search-cancel-button]:hidden"
         />
-        <button
-          type="submit"
-          className="absolute inset-y-1.5 right-1.5 rounded-full bg-caramel-300 px-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-espresso-900 transition hover:bg-caramel-400"
-        >
-          Search
-        </button>
+        {term && (
+          <button
+            type="button"
+            onClick={clearSearch}
+            aria-label="Clear search"
+            className="absolute right-2 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full text-espresso-800 transition hover:bg-caramel-300/40"
+          >
+            <StoreIcon name="close" className="size-4" />
+          </button>
+        )}
       </form>
 
       <label className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-espresso-800">
@@ -161,6 +221,15 @@ const ShopPage = () => {
         <div
           className={`transition-opacity ${searchOnTop ? '' : 'mt-12'} ${isFetching && !isPending ? 'opacity-60' : ''}`}
         >
+          {/* Updates with each search; screen readers hear it without leaving the field */}
+          <p
+            aria-live="polite"
+            className={q && data ? 'mb-6 text-sm text-espresso-800' : 'sr-only'}
+          >
+            {q && data
+              ? `${data.pagination.total} ${data.pagination.total === 1 ? 'result' : 'results'} for “${q}”`
+              : ''}
+          </p>
           {isPending && <p className="text-sm text-espresso-700">Loading products…</p>}
           {error && !data && <p className="text-sm text-red-700">{error.message}</p>}
 

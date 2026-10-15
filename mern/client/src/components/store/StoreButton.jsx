@@ -5,9 +5,9 @@ const VARIANTS = {
   solid:
     'bg-ember text-white shadow-lg shadow-tangerine-500/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-tangerine-500/30 disabled:translate-y-0 disabled:bg-none disabled:bg-caramel-300 disabled:text-espresso-700 disabled:shadow-none',
   // Second action next to a solid one, e.g. Buy it now
-  dark: 'bg-espresso-900 text-cream-50 hover:-translate-y-0.5 hover:bg-espresso-800',
+  dark: 'bg-espresso-900 text-cream-50 hover:-translate-y-0.5 hover:bg-espresso-800 disabled:translate-y-0 disabled:bg-espresso-900 disabled:opacity-35',
   outline:
-    'border border-espresso-900/80 text-espresso-900 hover:bg-espresso-900 hover:text-cream-50',
+    'border border-espresso-900/80 text-espresso-900 hover:bg-espresso-900 hover:text-cream-50 disabled:bg-transparent disabled:text-espresso-900 disabled:opacity-40',
   // On top of a photo or a dark band
   light: 'bg-cream-50 text-espresso-900 hover:-translate-y-0.5 hover:bg-white',
 };

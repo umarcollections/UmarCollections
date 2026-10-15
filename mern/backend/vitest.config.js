@@ -22,6 +22,8 @@ export default defineConfig({
       CLOUDINARY_API_SECRET: '',
       // Likewise, tests never send real emails or WhatsApp alerts
       RESEND_API_KEY: '',
+      GMAIL_APP_PASSWORD: '',
+      GOOGLE_CLIENT_ID: '',
       ALERT_WHATSAPP_PHONE: '',
       CALLMEBOT_API_KEY: '',
       SITE_URL: '',

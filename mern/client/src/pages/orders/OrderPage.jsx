@@ -67,7 +67,12 @@ const OrderPage = () => {
             {key && (
               <div className="mt-4 flex flex-wrap items-center gap-3 rounded-3xl border border-caramel-300/60 bg-cream-50 p-5 text-sm text-espresso-800">
                 <p className="flex-1">
-                  Save this page to check your order later. Anyone with the link can see it.
+                  We&apos;ve emailed this order and our bank details to{' '}
+                  <strong className="font-semibold text-espresso-900">
+                    {order.customer.email}
+                  </strong>
+                  . Not in your inbox? Check Spam and mark it &ldquo;Not spam&rdquo;. Save this page
+                  too: anyone with the link can see it.
                 </p>
                 <button
                   type="button"

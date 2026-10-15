@@ -16,9 +16,10 @@ const AUTH_PATHS = new Set(['/login', '/signup']);
 const RESTORE_TIMEOUT_MS = 1500;
 
 // Back and Forward return to where the visitor was on that page; a new page
-// starts at the top. Positions are remembered per history entry.
+// starts at the top, or at the section a link names (e.g. /account#orders).
+// Positions are remembered per history entry.
 const useScrollMemory = (page) => {
-  const { key } = useLocation();
+  const { key, hash } = useLocation();
   const navigationType = useNavigationType();
   const positions = useRef(new Map());
   const currentKey = useRef(key);
@@ -39,27 +40,33 @@ const useScrollMemory = (page) => {
     currentKey.current = key;
     const pageChanged = lastPage.current !== page;
     lastPage.current = page;
-    if (!pageChanged) return;
+    const section = navigationType !== 'POP' && hash ? hash.slice(1) : null;
+    if (!pageChanged && !section) return;
 
     const target = navigationType === 'POP' ? (positions.current.get(key) ?? 0) : 0;
-    if (target === 0) {
+    if (!section && target === 0) {
       window.scrollTo(0, 0);
       return;
     }
-    // Content may still be loading: wait until the page is tall enough
+    // Content may still be loading: wait until the section exists or the page
+    // is tall enough, then scroll (or give up after a moment)
     const started = performance.now();
     let frame;
-    const restore = () => {
-      const tallEnough = document.documentElement.scrollHeight >= target + window.innerHeight;
-      if (tallEnough || performance.now() - started > RESTORE_TIMEOUT_MS) {
-        window.scrollTo(0, target);
+    const settle = () => {
+      const element = section && document.getElementById(section);
+      const ready = section
+        ? Boolean(element)
+        : document.documentElement.scrollHeight >= target + window.innerHeight;
+      if (ready || performance.now() - started > RESTORE_TIMEOUT_MS) {
+        if (element) element.scrollIntoView({ block: 'start' });
+        else window.scrollTo(0, target);
         return;
       }
-      frame = requestAnimationFrame(restore);
+      frame = requestAnimationFrame(settle);
     };
-    restore();
+    settle();
     return () => cancelAnimationFrame(frame);
-  }, [key, page, navigationType]);
+  }, [key, hash, page, navigationType]);
 };
 
 // Shell for every storefront page: each page rises in softly; the header and

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,12 +11,48 @@ import useCart from '../../hooks/cart/useCart.js';
 import { useCartQuote, useCreateOrder } from '../../hooks/orders/useOrders.js';
 import useSettings from '../../hooks/settings/useSettings.js';
 import store from '../../lib/store.js';
-import { checkoutSchema } from '../../validators/orders/checkout.schema.js';
+import { checkoutFormSchema } from '../../validators/orders/checkout.schema.js';
 import usePageTitle from '../../hooks/common/usePageTitle.js';
 import StoreButton from '../../components/store/StoreButton.jsx';
 
+// Mirrors MAX_ADDRESSES in backend/src/models/user.model.js
+const MAX_ADDRESSES = 5;
+const NEW_ADDRESS = 'new';
+
+const addressValues = (saved) => ({
+  name: saved.name,
+  phone: saved.phone,
+  address: saved.address,
+  city: saved.city,
+  postalCode: saved.postalCode ?? '',
+});
+
+// Signed-in customers start with their default address and details filled in;
+// with no saved address yet, "save this address" starts ticked
+const checkoutDefaults = (user) => {
+  const saved = user?.addresses?.find((address) => address.isDefault);
+  return {
+    name: user?.name ?? '',
+    email: user?.email ?? '',
+    phone: user?.phone ?? '',
+    address: '',
+    city: store.city,
+    postalCode: '',
+    ...(saved && addressValues(saved)),
+    notes: '',
+    saveAddress: Boolean(user) && !user.addresses?.length,
+  };
+};
+
+const shortAddress = (saved) =>
+  `${saved.label ? `${saved.label}: ` : ''}${saved.address}, ${saved.city}`;
+
 const CheckoutPage = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const savedAddresses = user?.addresses ?? [];
+  const [chosenAddress, setChosenAddress] = useState(
+    () => savedAddresses.find((address) => address.isDefault)?._id ?? NEW_ADDRESS
+  );
   const { items, discountCode, clear } = useCart();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -28,24 +65,47 @@ const CheckoutPage = () => {
     register,
     handleSubmit,
     setError,
+    setValue,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm({
-    resolver: zodResolver(checkoutSchema),
-    defaultValues: {
-      name: user?.name ?? '',
-      email: user?.email ?? '',
-      phone: '',
-      address: '',
-      city: store.city,
-      postalCode: '',
-      notes: '',
-    },
+    resolver: zodResolver(checkoutFormSchema),
+    defaultValues: checkoutDefaults(user),
   });
+
+  // On a fresh page load the login arrives after the form is drawn: fill it in
+  // then, once per customer, so it never overwrites what they have typed
+  const filledFor = useRef(user?._id);
+  useEffect(() => {
+    if (!user || filledFor.current === user._id) return;
+    filledFor.current = user._id;
+    reset(checkoutDefaults(user));
+    setChosenAddress(user.addresses?.find((address) => address.isDefault)?._id ?? NEW_ADDRESS);
+  }, [user, reset]);
+
+  const chooseAddress = (id) => {
+    setChosenAddress(id);
+    const saved = savedAddresses.find((address) => address._id === id);
+    const values = saved ? addressValues(saved) : { address: '', city: store.city, postalCode: '' };
+    Object.entries(values).forEach(([field, value]) =>
+      setValue(field, value, { shouldValidate: Boolean(saved) })
+    );
+    setValue('saveAddress', !saved && savedAddresses.length < MAX_ADDRESSES);
+  };
 
   // Once the order exists the cart is emptied; don't bounce to /cart on the way out
   if (!items.length && !createOrder.isSuccess) return <Navigate to="/cart" replace />;
 
-  const onSubmit = async ({ name, email, phone, address, city, postalCode, notes }) => {
+  const onSubmit = async ({
+    name,
+    email,
+    phone,
+    address,
+    city,
+    postalCode,
+    notes,
+    saveAddress,
+  }) => {
     try {
       const { order, key } = await createOrder.mutateAsync({
         items: items.map(({ productId, variantId, quantity }) => ({
@@ -57,7 +117,10 @@ const CheckoutPage = () => {
         customer: { name, email, phone },
         shippingAddress: { address, city, postalCode },
         notes,
+        saveAddress: Boolean(user) && saveAddress,
       });
+      // The account now has the new address; refresh it in the background
+      if (user && saveAddress) refreshUser();
       navigate(`/orders/${order.orderNumber}?key=${encodeURIComponent(key)}`, { replace: true });
       clear();
     } catch (err) {
@@ -111,6 +174,22 @@ const CheckoutPage = () => {
           <section className="space-y-4">
             <h2 className="font-display text-2xl text-espresso-900">Delivery address</h2>
             <p className="text-sm text-espresso-700">We deliver within {store.city} only.</p>
+            {savedAddresses.length > 0 && (
+              <StoreField
+                as="select"
+                label="Deliver to"
+                value={chosenAddress}
+                onChange={(event) => chooseAddress(event.target.value)}
+              >
+                {savedAddresses.map((saved) => (
+                  <option key={saved._id} value={saved._id}>
+                    {shortAddress(saved)}
+                    {saved.isDefault ? ' (default)' : ''}
+                  </option>
+                ))}
+                <option value={NEW_ADDRESS}>A new address</option>
+              </StoreField>
+            )}
             <StoreField
               as="textarea"
               rows={3}
@@ -133,6 +212,16 @@ const CheckoutPage = () => {
                 {...register('postalCode')}
               />
             </div>
+            {user && chosenAddress === NEW_ADDRESS && savedAddresses.length < MAX_ADDRESSES && (
+              <label className="flex items-center gap-3 py-1 text-sm text-espresso-900">
+                <input
+                  type="checkbox"
+                  className="size-4 accent-espresso-900"
+                  {...register('saveAddress')}
+                />
+                Save this address to my account
+              </label>
+            )}
             <StoreField
               as="textarea"
               rows={2}

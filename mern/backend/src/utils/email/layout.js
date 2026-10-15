@@ -3,7 +3,7 @@ import store, { whatsappLink } from '../../config/store.js';
 // Shared pieces for every email. Email apps ignore stylesheets and web fonts,
 // so styles are inline, layout uses tables, and fonts fall back to Georgia and Arial.
 
-const COLORS = {
+export const COLORS = {
   page: '#f3e5d0',
   card: '#fffbf5',
   text: '#2e2018',
@@ -12,7 +12,7 @@ const COLORS = {
   line: '#e6c9a3',
 };
 const SERIF = "Georgia, 'Times New Roman', serif";
-const SANS = 'Arial, Helvetica, sans-serif';
+export const SANS = 'Arial, Helvetica, sans-serif';
 
 export const escapeHtml = (value) =>
   String(value ?? '').replace(

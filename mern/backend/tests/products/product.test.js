@@ -356,6 +356,33 @@ describe('public products', () => {
     expect(unknown.body.data).toEqual([]);
   });
 
+  it('searches part of the product name or its category name, ignoring case', async () => {
+    const token = await asAdmin();
+    const bags = (
+      await api().post('/api/admin/categories').set(authHeader(token)).send({ name: 'Bags' })
+    ).body.data;
+    await createProduct(token, {
+      title: 'Tote',
+      status: 'active',
+      category: bags._id,
+      variants: [{ price: 30, stock: 1 }],
+    });
+    await createProduct(token, {
+      title: 'Hidden Bag',
+      status: 'draft',
+      variants: [{ price: 30, stock: 1 }],
+    });
+    await createProduct(token);
+
+    const titles = async (q) =>
+      (await api().get(`/api/products?q=${encodeURIComponent(q)}`)).body.data.map((p) => p.title);
+
+    expect(await titles('lin')).toEqual(['Linen Shirt']);
+    expect(await titles('LIN')).toEqual(['Linen Shirt']);
+    expect(await titles('bag')).toEqual(['Tote']);
+    expect(await titles('(')).toEqual([]);
+  });
+
   it('ignores bad query values instead of failing', async () => {
     const res = await api().get('/api/products?page=-3&limit=9999&sort=evil&q[$ne]=x');
     expect(res.status).toBe(200);

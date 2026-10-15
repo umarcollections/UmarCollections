@@ -1,3 +1,4 @@
+import env from '../../config/env.js';
 import Settings, { getSettings } from '../../models/settings.model.js';
 import { isImageStorageReady } from '../../utils/imageStorage.js';
 import { discardImage, storeSingleImage } from '../../utils/singleImage.js';
@@ -15,6 +16,8 @@ const toResponse = (settings) => ({
   announcement: settings.announcement,
   checkoutOpen: settings.bankAccounts.length > 0,
   uploadsEnabled: isImageStorageReady(),
+  // Shows "Continue with Google" when set; the ID is public by design
+  googleClientId: env.google.clientId ?? null,
 });
 
 // GET /api/settings (public)

@@ -5,6 +5,7 @@ import AuthContext from './AuthContext.js';
 import { UNAUTHORIZED_EVENT } from '../../services/api.js';
 import {
   adminLoginRequest,
+  googleLoginRequest,
   getSessionRequest,
   loginRequest,
   logoutRequest,
@@ -102,6 +103,11 @@ const AuthProvider = ({ children }) => {
     [startSession]
   );
 
+  const googleLogin = useCallback(
+    async (credential) => startSession(await googleLoginRequest(credential)),
+    [startSession]
+  );
+
   const signup = useCallback(
     async (details) => startSession(await signupRequest(details)),
     [startSession]
@@ -117,6 +123,10 @@ const AuthProvider = ({ children }) => {
     channelRef.current?.postMessage('logout');
   }, [clearSession]);
 
+  // Account changes (profile, addresses) answer with the updated user; this
+  // shows them at once without asking the server again
+  const updateUser = useCallback((data) => setUser(data), []);
+
   const value = useMemo(
     () => ({
       user,
@@ -124,10 +134,14 @@ const AuthProvider = ({ children }) => {
       isAuthenticated: status === 'authenticated',
       login,
       adminLogin,
+      googleLogin,
       signup,
       logout,
+      updateUser,
+      // Fetches the user again, e.g. after checkout saved an address
+      refreshUser: restoreSession,
     }),
-    [user, status, login, adminLogin, signup, logout]
+    [user, status, login, adminLogin, googleLogin, signup, logout, updateUser, restoreSession]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

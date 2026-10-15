@@ -5,6 +5,8 @@ import { createResetToken, hashResetToken } from '../../utils/auth/resetToken.js
 import { passwordResetEmail } from '../../utils/email/accountEmails.js';
 import sendEmail from '../../utils/email/sendEmail.js';
 import siteUrl from '../../utils/siteUrl.js';
+import env from '../../config/env.js';
+import verifyGoogleToken from '../../utils/auth/verifyGoogleToken.js';
 
 const RESET_LINK_MS = 60 * 60 * 1000;
 // A second request this soon after a link was sent doesn't send another
@@ -108,4 +110,38 @@ export const resetPassword = async (req, res) => {
   user.resetPasswordExpires = undefined;
   await user.save();
   res.json({ success: true, message: 'Your password has been changed. You can now log in.' });
+};
+
+// POST /api/auth/google  { credential }
+// "Continue with Google" for customers. Google has already checked the email,
+// so a customer who signed up with a password and then uses Google with the
+// same email gets one account, now linked to Google. New emails get a new
+// account with no password. The admin signs in at /admin/login only.
+export const googleLogin = async (req, res) => {
+  if (!env.google.clientId) throw new ApiError(503, 'Google sign-in is not set up yet');
+  const profile = await verifyGoogleToken(req.body.credential);
+  if (!profile.email_verified) {
+    throw new ApiError(400, 'Your Google email is not verified. Verify it with Google first.');
+  }
+
+  const email = profile.email.toLowerCase();
+  let user = (await User.findOne({ googleId: profile.sub })) ?? (await User.findOne({ email }));
+  if (user?.role === 'admin') {
+    throw new ApiError(403, 'The admin signs in at /admin/login with a password');
+  }
+
+  if (!user) {
+    user = await User.create({
+      name: (profile.name || email.split('@')[0]).slice(0, 50),
+      email,
+      googleId: profile.sub,
+      hasPassword: false,
+    });
+    return sendAuthResponse(res, 201, user);
+  }
+  if (!user.googleId) {
+    user.googleId = profile.sub;
+    await user.save();
+  }
+  sendAuthResponse(res, 200, user);
 };

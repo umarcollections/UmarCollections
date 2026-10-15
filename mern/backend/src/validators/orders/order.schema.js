@@ -19,7 +19,7 @@ const itemsField = z
   .min(1, 'Your cart is empty')
   .max(50, 'Too many different items in one order');
 
-const text = (label, min, max) =>
+export const text = (label, min, max) =>
   z
     .string({ error: `${label} is required` })
     .trim()
@@ -31,6 +31,20 @@ export const quoteSchema = z.object({
   discountCode: discountCodeField.optional(),
 });
 
+// Shared with the address book (validators/account/account.schema.js), so a
+// saved address always passes checkout
+// Digits with optional +, spaces, dashes or brackets, e.g. +92 300 1234567
+export const phoneField = z
+  .string({ error: 'Phone number is required' })
+  .trim()
+  .regex(/^\+?[\d\s()-]{7,20}$/, 'Please provide a valid phone number');
+
+export const addressFields = {
+  address: text('Address', 5, 300),
+  city: text('City', 2, 80),
+  postalCode: z.string().trim().max(20, 'Postal code is too long').default(''),
+};
+
 export const createOrderSchema = z.object({
   items: itemsField,
   discountCode: discountCodeField.optional(),
@@ -41,18 +55,12 @@ export const createOrderSchema = z.object({
       .trim()
       .toLowerCase()
       .pipe(z.email('Please provide a valid email')),
-    // Digits with optional +, spaces, dashes or brackets, e.g. +92 300 1234567
-    phone: z
-      .string({ error: 'Phone number is required' })
-      .trim()
-      .regex(/^\+?[\d\s()-]{7,20}$/, 'Please provide a valid phone number'),
+    phone: phoneField,
   }),
-  shippingAddress: z.object({
-    address: text('Address', 5, 300),
-    city: text('City', 2, 80),
-    postalCode: z.string().trim().max(20, 'Postal code is too long').default(''),
-  }),
+  shippingAddress: z.object(addressFields),
   notes: z.string().trim().max(500, 'Notes must be at most 500 characters').default(''),
+  // Signed-in customers can keep this address in their account
+  saveAddress: z.boolean().default(false),
 });
 
 export const submitPaymentSchema = z.object({

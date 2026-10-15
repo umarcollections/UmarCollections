@@ -1,7 +1,5 @@
 import Order from '../../models/order.model.js';
 import releaseOrderHolds from './releaseOrderHolds.js';
-import { orderCancelledEmail } from '../email/orderEmails.js';
-import sendEmail from '../email/sendEmail.js';
 
 const CHECK_EVERY_MS = 10 * 60 * 1000;
 
@@ -27,7 +25,6 @@ export const cancelUnpaidOrders = async (now = new Date()) => {
     );
     if (order) {
       await releaseOrderHolds(order);
-      await sendEmail(orderCancelledEmail(order, { expired: true }));
       cancelled += 1;
     }
   }

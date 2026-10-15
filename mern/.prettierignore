@@ -2,3 +2,6 @@ node_modules
 dist
 coverage
 package-lock.json
+
+# Search engine verification files must stay byte-for-byte as issued
+client/public/google*.html

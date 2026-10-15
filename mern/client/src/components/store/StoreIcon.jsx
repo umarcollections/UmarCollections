@@ -41,6 +41,39 @@ const PATHS = {
       <circle cx="12" cy="10" r="2.4" />
     </>
   ),
+  orders: (
+    <>
+      <rect x="5.5" y="4.5" width="13" height="16" rx="2" />
+      <path d="M9 4.5V3.8a.8.8 0 0 1 .8-.8h4.4a.8.8 0 0 1 .8.8v.7M9 10h6M9 13.5h6M9 17h3.5" />
+    </>
+  ),
+  help: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.4" />
+      <path d="M12 16.8v.2" />
+    </>
+  ),
+  logout: (
+    <>
+      <path d="M10 20.5H6.5a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2H10" />
+      <path d="m15.5 16.5 4.5-4.5-4.5-4.5M20 12H9.5" />
+    </>
+  ),
+  admin: (
+    <>
+      <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />
+      <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" />
+      <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" />
+      <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
+    </>
+  ),
+  lock: (
+    <>
+      <rect x="5" y="10.5" width="14" height="10" rx="2" />
+      <path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3" />
+    </>
+  ),
   close: <path d="m6 6 12 12M18 6 6 18" />,
   arrow: <path d="M5 12h14m-5.5-5.5L19 12l-5.5 5.5" />,
   plus: <path d="M12 5v14M5 12h14" />,

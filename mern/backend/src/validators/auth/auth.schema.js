@@ -39,3 +39,11 @@ export const resetPasswordSchema = z.object({
     .max(200),
   password: passwordField,
 });
+
+// The ID token Google's sign-in button hands the browser
+export const googleLoginSchema = z.object({
+  credential: z
+    .string({ error: 'Google sign-in failed, please try again' })
+    .min(1, 'Google sign-in failed, please try again')
+    .max(4096),
+});

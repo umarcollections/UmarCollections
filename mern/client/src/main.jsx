@@ -28,7 +28,15 @@ createRoot(document.getElementById('root')).render(
             <ErrorBoundary>
               <App />
             </ErrorBoundary>
-            <Toaster position="top-right" richColors closeButton />
+            {/* Below the header (117px tall at the top of the page, 101px on
+                phones), so messages never cover the account and cart buttons */}
+            <Toaster
+              position="top-right"
+              offset={{ top: 128, right: 24 }}
+              mobileOffset={{ top: 112 }}
+              richColors
+              closeButton
+            />
           </CartProvider>
         </AuthProvider>
       </QueryClientProvider>

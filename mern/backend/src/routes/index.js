@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import userRoutes from './users/user.routes.js';
 import authRoutes from './auth/auth.routes.js';
+import accountRoutes from './account/account.routes.js';
 import categoryRoutes from './categories/category.routes.js';
 import adminCategoryRoutes from './categories/adminCategory.routes.js';
 import productRoutes from './products/product.routes.js';
@@ -17,6 +18,7 @@ const router = Router();
 // Register each resource here
 router.use('/users', userRoutes);
 router.use('/auth', authRoutes);
+router.use('/account', accountRoutes);
 
 // Storefront (public) and store management (admin only)
 router.use('/categories', categoryRoutes);

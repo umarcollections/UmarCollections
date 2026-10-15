@@ -49,3 +49,6 @@ export const paymentWithScreenshotSchema = paymentSchema.extend({
       message: `Screenshot must be ${MAX_IMAGE_MB} MB or smaller`,
     }),
 });
+
+// The checkout form also carries the "save this address" box for signed-in customers
+export const checkoutFormSchema = checkoutSchema.extend({ saveAddress: z.boolean() });

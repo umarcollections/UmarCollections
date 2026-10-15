@@ -13,6 +13,10 @@ export const loginRequest = (payload) =>
 export const adminLoginRequest = (payload) =>
   request('/auth/admin/login', { method: 'POST', body: payload, notifyUnauthorized: false });
 
+// credential: the ID token from Google's sign-in button
+export const googleLoginRequest = (credential) =>
+  request('/auth/google', { method: 'POST', body: { credential }, notifyUnauthorized: false });
+
 export const logoutRequest = () =>
   request('/auth/logout', { method: 'POST', notifyUnauthorized: false });
 

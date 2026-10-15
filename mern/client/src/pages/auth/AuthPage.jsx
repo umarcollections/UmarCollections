@@ -6,6 +6,7 @@ import LoginForm from '../../components/auth/LoginForm.jsx';
 import SignupForm from '../../components/auth/SignupForm.jsx';
 import StoreButton from '../../components/store/StoreButton.jsx';
 import usePageTitle from '../../hooks/common/usePageTitle.js';
+import { afterSignInPath } from '../../lib/authRedirect.js';
 import store from '../../lib/store.js';
 
 // What the sliding panel says while each form is showing: it invites the
@@ -35,7 +36,8 @@ const AuthPage = () => {
   const card = useRef(null);
   const firstRun = useRef(true);
   const mode = pathname === '/signup' ? 'signup' : 'login';
-  const redirectTo = state?.from?.pathname || '/account';
+  // Back to the page the visitor came from; otherwise home, or the admin for admins
+  const afterSignIn = (user) => afterSignInPath(state, user);
   usePageTitle(mode === 'signup' ? 'Create an account' : 'Log in');
 
   // Keeps where the visitor was heading (state.from) when they switch forms
@@ -100,13 +102,17 @@ const AuthPage = () => {
             data-auth-form="login"
             className="col-start-1 row-start-1 p-8 sm:p-12 md:flex md:flex-col md:justify-center"
           >
-            <LoginForm redirectTo={redirectTo} onSwitch={switchMode} />
+            <LoginForm afterSignIn={afterSignIn} onSwitch={switchMode} active={mode === 'login'} />
           </div>
           <div
             data-auth-form="signup"
             className="col-start-1 row-start-1 p-8 sm:p-12 md:col-start-2 md:flex md:flex-col md:justify-center"
           >
-            <SignupForm redirectTo={redirectTo} onSwitch={switchMode} />
+            <SignupForm
+              afterSignIn={afterSignIn}
+              onSwitch={switchMode}
+              active={mode === 'signup'}
+            />
           </div>
 
           {/* Starts over the right half (sign-up side) and slides left for sign-up */}

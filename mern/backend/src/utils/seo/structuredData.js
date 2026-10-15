@@ -37,6 +37,9 @@ export const storeData = (base) => ({
   name: store.name,
   alternateName: store.alternateNames,
   url: `${base}/`,
+  // Square brand mark Google can show beside the store (it wants 112px or more)
+  logo: `${base}/favicon-192x192.png`,
+  image: `${base}/og-image.jpg`,
   description: store.description,
   email: store.email,
   telephone: `+${store.phone.replace(/\D/g, '')}`,

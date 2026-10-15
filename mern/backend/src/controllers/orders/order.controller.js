@@ -4,6 +4,7 @@ import ApiError from '../../utils/ApiError.js';
 import { deleteImage, isImageStorageReady, uploadImage } from '../../utils/imageStorage.js';
 import { orderKeyMatches } from '../../utils/orders/orderKey.js';
 import placeOrder from '../../utils/orders/placeOrder.js';
+import saveCheckoutAddress from '../../utils/account/saveCheckoutAddress.js';
 import { priceCart } from '../../utils/orders/pricing.js';
 import {
   newOrderAlert,
@@ -60,6 +61,7 @@ export const quoteCart = async (req, res) => {
 // POST /api/orders
 export const createOrder = async (req, res) => {
   const { order, key } = await placeOrder({ ...req.body, userId: req.user?._id });
+  if (req.user && req.body.saveAddress) await saveCheckoutAddress(req.user._id, req.body);
   const orderUrl = `${siteUrl(req)}/orders/${order.orderNumber}?key=${encodeURIComponent(key)}`;
   const adminUrl = adminOrderUrl(req, order);
   await Promise.all([

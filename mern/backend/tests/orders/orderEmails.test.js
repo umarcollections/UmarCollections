@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import env from '../../src/config/env.js';
-import Order from '../../src/models/order.model.js';
 import Product from '../../src/models/product.model.js';
 import Settings from '../../src/models/settings.model.js';
 import { deleteImage, isImageStorageReady, uploadImage } from '../../src/utils/imageStorage.js';
@@ -90,7 +89,7 @@ describe('order emails', () => {
     expect(customer.from).toBe('Store <orders@store.test>');
     expect(customer.reply_to).toBe('umarcollections.store@gmail.com');
     expect(customer.subject).toBe(
-      `Order ${order.orderNumber}: please pay Rs 3,450 by bank transfer`
+      `We've received your order ${order.orderNumber} at Umar Collections`
     );
     expect(customer.html).toContain(`/orders/${order.orderNumber}?key=${key}`);
     expect(customer.html).toContain('JazzCash');
@@ -124,57 +123,39 @@ describe('order emails', () => {
     expect(ownerEmail.html).toContain('https://img.test/p.jpg');
   });
 
-  it('emails the customer for each admin action except delivery', async () => {
+  it('emails the customer only when the order is delivered', async () => {
     const { token } = await createUser({ role: 'admin' });
     const placed = (await placeOrder()).body.data;
     const n = placed.order.orderNumber;
     const act = (body) =>
       api().post(`/api/admin/orders/${placed.order._id}/actions`).set(authHeader(token)).send(body);
-    const lastToCustomer = () =>
-      sentEmails()
-        .filter((e) => e.to === 'ayesha@example.com')
-        .at(-1);
+    const toCustomer = () => sentEmails().filter((e) => e.to === 'ayesha@example.com');
 
+    expect(toCustomer()).toHaveLength(1); // the order-placed email
     await pay(placed);
     await act({ action: 'reject_payment', note: 'Amount was Rs 3,000, not Rs 3,450' });
-    expect(lastToCustomer().subject).toBe(`Order ${n}: we couldn't match your payment`);
-    expect(lastToCustomer().html).toContain('Amount was Rs 3,000, not Rs 3,450');
-
     await pay(placed);
     await act({ action: 'confirm_payment' });
-    expect(lastToCustomer().subject).toBe(`Order ${n}: payment received`);
-
     await act({ action: 'ship', courier: 'TCS', trackingNumber: 'TCS-123' });
-    expect(lastToCustomer().subject).toBe(`Order ${n} is on its way`);
-    expect(lastToCustomer().html).toContain('TCS-123');
+    expect(toCustomer()).toHaveLength(1);
 
-    const before = sentEmails().length;
     await act({ action: 'deliver' });
-    expect(sentEmails()).toHaveLength(before);
+    expect(toCustomer()).toHaveLength(2);
+    expect(toCustomer()[1].subject).toBe(`Your order ${n} has been delivered`);
   });
 
-  it('tells the customer why their order was cancelled', async () => {
+  it("doesn't email when an order is cancelled, by the admin or for no payment", async () => {
     const { token } = await createUser({ role: 'admin' });
-    const placed = (await placeOrder()).body.data;
-    await api()
-      .post(`/api/admin/orders/${placed.order._id}/actions`)
+    const first = (await placeOrder()).body.data;
+    const cancelled = await api()
+      .post(`/api/admin/orders/${first.order._id}/actions`)
       .set(authHeader(token))
       .send({ action: 'cancel', note: 'Out of stock' });
+    expect(cancelled.status).toBe(200);
+    const before = sentEmails().length;
 
-    const cancelled = sentEmails().at(-1);
-    expect(cancelled.subject).toBe(`Order ${placed.order.orderNumber} has been cancelled`);
-    expect(cancelled.text).toContain('Reason: Out of stock');
-  });
-
-  it('emails customers whose unpaid order expired', async () => {
-    const placed = (await placeOrder()).body.data;
     await cancelUnpaidOrders(new Date(Date.now() + 49 * 60 * 60 * 1000));
-
-    const expired = sentEmails().at(-1);
-    expect(expired.to).toBe('ayesha@example.com');
-    expect(expired.subject).toBe(`Order ${placed.order.orderNumber} has been cancelled`);
-    expect(expired.text).toContain("didn't receive payment in time");
-    expect((await Order.findById(placed.order._id)).status).toBe('cancelled');
+    expect(sentEmails()).toHaveLength(before);
   });
 
   it('still places the order when Resend refuses to send', async () => {

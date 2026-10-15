@@ -1,15 +1,24 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import SearchSuggestions from './SearchSuggestions.jsx';
 import StoreIcon from './StoreIcon.jsx';
+import useDebouncedValue from '../../hooks/common/useDebouncedValue.js';
+
+// How long typing has to pause before the matches are fetched
+const SEARCH_DELAY_MS = 250;
 
 // Search bar that drops down under the header from its search icon, on any page.
-// The results are the shop page filtered by what was typed.
+// Matching products show under it as the visitor types; Enter opens them all
+// on the shop page.
 const StoreSearch = ({ onClose }) => {
   const root = useRef(null);
+  const input = useRef(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [term, setTerm] = useState(searchParams.get('q') ?? '');
+  const settledTerm = useDebouncedValue(term.trim(), SEARCH_DELAY_MS);
 
   useGSAP(
     () => {
@@ -25,7 +34,7 @@ const StoreSearch = ({ onClose }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const q = event.currentTarget.elements.q.value.trim();
+    const q = term.trim();
     navigate(q ? `/shop?q=${encodeURIComponent(q)}` : '/shop');
   };
 
@@ -57,15 +66,32 @@ const StoreSearch = ({ onClose }) => {
               className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-espresso-700"
             />
             <input
+              ref={input}
               id="header-search"
               name="q"
               type="search"
               enterKeyHint="search"
               autoFocus
-              defaultValue={searchParams.get('q') ?? ''}
+              autoComplete="off"
+              value={term}
+              onChange={(event) => setTerm(event.target.value)}
+              aria-controls="search-suggestions"
               placeholder="Search products"
-              className="w-full rounded-full border border-caramel-300 bg-white py-3 pl-12 pr-28 text-sm text-espresso-900 outline-none transition placeholder:text-espresso-700/50 focus:border-caramel-500 focus:ring-4 focus:ring-caramel-400/20"
+              className="w-full rounded-full border border-caramel-300 bg-white py-3 pl-12 pr-40 text-sm text-espresso-900 outline-none transition placeholder:text-espresso-700/50 focus:border-caramel-500 focus:ring-4 focus:ring-caramel-400/20 [&::-webkit-search-cancel-button]:hidden"
             />
+            {term && (
+              <button
+                type="button"
+                onClick={() => {
+                  setTerm('');
+                  input.current?.focus();
+                }}
+                aria-label="Clear search"
+                className="absolute right-28 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full text-espresso-800 transition hover:bg-caramel-300/40"
+              >
+                <StoreIcon name="close" className="size-4" />
+              </button>
+            )}
             <button
               type="submit"
               className="absolute inset-y-1.5 right-1.5 rounded-full bg-espresso-900 px-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-cream-50 transition hover:bg-espresso-800"
@@ -73,6 +99,7 @@ const StoreSearch = ({ onClose }) => {
               Search
             </button>
           </div>
+          <SearchSuggestions term={settledTerm} />
         </form>
       </div>
     </div>

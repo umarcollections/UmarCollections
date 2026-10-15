@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import AccountMenu from './AccountMenu.jsx';
+import Avatar from './Avatar.jsx';
 import StoreIcon from './StoreIcon.jsx';
 import StoreMenu from './StoreMenu.jsx';
 import StoreSearch from './StoreSearch.jsx';
@@ -10,6 +13,7 @@ import useAuth from '../../hooks/auth/useAuth.js';
 import useCart from '../../hooks/cart/useCart.js';
 import useCategories from '../../hooks/categories/useCategories.js';
 import Wordmark from './Wordmark.jsx';
+import { rememberPage } from '../../lib/authRedirect.js';
 
 const NAV_LINKS = [
   { to: '/shop', label: 'Shop' },
@@ -24,30 +28,43 @@ const navClass = ({ isActive }) =>
       : 'text-espresso-800 after:scale-x-0 hover:text-espresso-900 hover:after:scale-x-100'
   }`;
 
-const accountLink = (user) => {
+// Guests go to log in and come back to the page they were on
+const accountLink = (user, location) => {
   if (user?.role === 'admin') return { to: '/admin', label: 'Admin' };
   if (user) return { to: '/account', label: 'Your account' };
-  return { to: '/login', label: 'Log in' };
+  return { to: '/login', label: 'Log in', state: rememberPage(location) };
 };
 
 // Transparent over the top of the page, frosted cream once the visitor scrolls
 const StoreHeader = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const { count, openDrawer } = useCart();
   const seenCount = useRef(count);
   const { data: categories = [] } = useCategories();
   const [scrolled, setScrolled] = useState(false);
-  const { key } = useLocation();
-  // The open panel ('menu' or 'search') and the page it was opened on, so going
+  const location = useLocation();
+  const { key } = location;
+  // The open panel ('menu', 'search' or 'account') and the page it was opened on, so going
   // to another page (a link, a search, Back) closes it
   const [opened, setOpened] = useState(null);
   const panel = opened?.key === key ? opened.name : null;
   const menuOpen = panel === 'menu';
   const searchOpen = panel === 'search';
+  const accountOpen = panel === 'account';
   const togglePanel = (name) => setOpened(panel === name ? null : { name, key });
   const closePanel = () => setOpened(null);
   const header = useRef(null);
-  const account = accountLink(user);
+  const accountArea = useRef(null);
+  const accountButton = useRef(null);
+  const account = accountLink(user, location);
+
+  const handleLogout = async () => {
+    closePanel();
+    await logout();
+    toast.success('You have been logged out');
+    navigate('/');
+  };
 
   useGSAP(
     () => {
@@ -84,13 +101,28 @@ const StoreHeader = () => {
   // Escape closes the open panel; behind the full-screen menu the page doesn't scroll
   useEffect(() => {
     if (!panel) return;
-    const onKey = (event) => event.key === 'Escape' && setOpened(null);
+    const onKey = (event) => {
+      if (event.key !== 'Escape') return;
+      setOpened(null);
+      // Keyboard users carry on from the button that opened the account menu
+      if (panel === 'account') accountButton.current?.focus();
+    };
     if (panel === 'menu') document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', onKey);
     };
+  }, [panel]);
+
+  // The account menu also closes on a click or tap anywhere outside it
+  useEffect(() => {
+    if (panel !== 'account') return;
+    const onPointerDown = (event) => {
+      if (!accountArea.current?.contains(event.target)) setOpened(null);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
   }, [panel]);
 
   return (
@@ -145,13 +177,36 @@ const StoreHeader = () => {
           >
             <StoreIcon name={searchOpen ? 'close' : 'search'} />
           </button>
-          <Link
-            to={account.to}
-            aria-label={account.label}
-            className="hidden size-10 place-items-center rounded-full transition hover:bg-caramel-300/40 hover:text-tangerine-700 sm:grid"
-          >
-            <StoreIcon name="account" />
-          </Link>
+          {user ? (
+            <div ref={accountArea} className="relative hidden sm:block">
+              <button
+                ref={accountButton}
+                type="button"
+                onClick={() => togglePanel('account')}
+                aria-expanded={accountOpen}
+                aria-controls="account-menu"
+                aria-label={`Account menu for ${user.name}`}
+                className="grid size-10 place-items-center rounded-full transition hover:bg-caramel-300/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tangerine-500"
+              >
+                <Avatar
+                  name={user.name}
+                  className={`size-8 text-[11px] ring-2 ring-offset-2 ring-offset-cream-50 transition ${
+                    accountOpen ? 'ring-tangerine-500' : 'ring-caramel-300'
+                  }`}
+                />
+              </button>
+              {accountOpen && <AccountMenu user={user} onLogout={handleLogout} />}
+            </div>
+          ) : (
+            <Link
+              to={account.to}
+              state={account.state}
+              aria-label={account.label}
+              className="hidden size-10 place-items-center rounded-full transition hover:bg-caramel-300/40 hover:text-tangerine-700 sm:grid"
+            >
+              <StoreIcon name="account" />
+            </Link>
+          )}
           <button
             type="button"
             onClick={openDrawer}
@@ -177,6 +232,8 @@ const StoreHeader = () => {
           links={NAV_LINKS}
           categories={categories}
           account={account}
+          user={user}
+          onLogout={handleLogout}
           onClose={closePanel}
         />
       )}

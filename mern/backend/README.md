@@ -60,6 +60,7 @@ The "V" is the React app in `../client`: this API only returns JSON.
 | POST   | /api/auth/logout          | public    | clear cookie               |
 | GET    | /api/auth/me              | logged in | current user + expiry      |
 | GET    | /api/auth/session         | public    | current user or null       |
+| POST   | /api/auth/google          | public    | continue with Google       |
 | POST   | /api/auth/forgot-password | public    | emails a reset link        |
 | POST   | /api/auth/reset-password  | public    | sets a new password        |
 | GET    | /api/users                | admin     | list users                 |

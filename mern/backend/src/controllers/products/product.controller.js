@@ -13,11 +13,18 @@ const SORTS = {
 };
 
 // GET /api/products?q=&category=<slug>&sort=&page=&limit=
+// q matches part of the product name or category name, ignoring case
 export const getProducts = async (req, res) => {
   const { q, category, sort, page, limit } = productListQuerySchema.parse(req.query);
   const filter = { status: 'active' };
 
-  if (q) filter.title = { $regex: escapeRegex(q), $options: 'i' };
+  // A search matches the product name or its category's name, so "bag" finds
+  // everything in Bags, not only products with "bag" in their name
+  if (q) {
+    const pattern = { $regex: escapeRegex(q), $options: 'i' };
+    const matchingCategories = await Category.find({ name: pattern }).distinct('_id');
+    filter.$or = [{ title: pattern }, { category: { $in: matchingCategories } }];
+  }
   if (category) {
     const found = await Category.findOne({ slug: category });
     // An unknown category shows no products rather than every product

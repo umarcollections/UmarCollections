@@ -14,6 +14,18 @@ const useProducts = (params) =>
     placeholderData: keepPreviousData,
   });
 
+// A handful of matches for the header search, fetched while the visitor types.
+// The previous matches stay up while the next ones load, so the list doesn't flicker.
+const SUGGESTION_COUNT = 6;
+export const useProductSuggestions = (q) =>
+  useQuery({
+    queryKey: productKeys.list({ q, limit: SUGGESTION_COUNT }),
+    queryFn: () => getProductsRequest({ q, limit: SUGGESTION_COUNT }),
+    enabled: Boolean(q),
+    placeholderData: keepPreviousData,
+    staleTime: 30_000,
+  });
+
 export const useProduct = (slug) =>
   useQuery({
     queryKey: productKeys.detail(slug),

@@ -19,13 +19,15 @@ const chipClass = (active) =>
     active ? 'bg-espresso-900 text-cream-50' : `${GLASS} text-espresso-900 active:bg-cream-50/80`
   }`;
 
-// A row in the glass card at the bottom: round icon, text, arrow
+// A row in the glass card at the bottom: round icon, text, arrow. Pass `to` for
+// a page, `href` for an outside link, or neither for a button.
 const CardRow = ({ icon, iconClass, title, detail, ...props }) => {
-  const Tag = props.to ? Link : 'a';
+  const Tag = props.to ? Link : props.href ? 'a' : 'button';
   return (
     <Tag
+      {...(Tag === 'button' && { type: 'button' })}
       {...props}
-      className="flex items-center gap-4 rounded-2xl p-3 transition active:bg-cream-50/60"
+      className="flex w-full items-center gap-4 rounded-2xl p-3 text-left transition active:bg-cream-50/60"
     >
       <span className={`grid size-10 shrink-0 place-items-center rounded-full ${iconClass}`}>
         <StoreIcon name={icon} />
@@ -40,8 +42,9 @@ const CardRow = ({ icon, iconClass, title, detail, ...props }) => {
 };
 
 // Full-screen menu for phones and tablets: the main pages as numbered rows,
-// categories as glass chips, and the account and WhatsApp in a card at the bottom
-const StoreMenu = ({ links, categories, account, onClose }) => {
+// categories as glass chips, and the account and WhatsApp in a card at the bottom.
+// Signed-in customers also get their orders and Log out there.
+const StoreMenu = ({ links, categories, account, user, onLogout, onClose }) => {
   const panel = useRef(null);
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
@@ -134,12 +137,26 @@ const StoreMenu = ({ links, categories, account, onClose }) => {
         <div className={`rounded-3xl p-2 ${GLASS}`}>
           <CardRow
             to={account.to}
+            state={account.state}
             onClick={onClose}
             icon="account"
             iconClass="bg-espresso-900 text-cream-50"
             title={account.label}
+            detail={user?.email}
           />
           <div aria-hidden="true" className="mx-3 h-px bg-espresso-900/10" />
+          {user && (
+            <>
+              <CardRow
+                to="/account#orders"
+                onClick={onClose}
+                icon="orders"
+                iconClass="bg-cream-50 text-espresso-900"
+                title="My orders"
+              />
+              <div aria-hidden="true" className="mx-3 h-px bg-espresso-900/10" />
+            </>
+          )}
           <CardRow
             href={whatsappLink}
             target="_blank"
@@ -149,6 +166,17 @@ const StoreMenu = ({ links, categories, account, onClose }) => {
             title="Chat on WhatsApp"
             detail={store.phone}
           />
+          {user && (
+            <>
+              <div aria-hidden="true" className="mx-3 h-px bg-espresso-900/10" />
+              <CardRow
+                onClick={onLogout}
+                icon="logout"
+                iconClass="bg-red-50 text-red-700"
+                title="Log out"
+              />
+            </>
+          )}
         </div>
       </div>
     </div>

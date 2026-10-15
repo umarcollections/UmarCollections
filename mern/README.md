@@ -170,8 +170,10 @@ address, the login cookie stays first-party and no CORS or cookie settings are n
    | `CLOUDINARY_API_SECRET` | from the Cloudinary dashboard                            |
    | `ALERT_WHATSAPP_PHONE`  | phone for order alerts, digits only, e.g. `923074801091` |
    | `CALLMEBOT_API_KEY`     | from CallMeBot (see below)                               |
+   | `GMAIL_APP_PASSWORD`    | store Gmail App Password, for emails (see below)         |
    | `RESEND_API_KEY`        | from Resend, for emails (see below)                      |
    | `EMAIL_FROM`            | only after verifying a domain in Resend (see below)      |
+   | `GOOGLE_CLIENT_ID`      | for "Continue with Google" (see below)                   |
    | `SITE_URL`              | the address people use, e.g. `https://example.com`       |
 
    Make a `JWT_SECRET` with:
@@ -198,13 +200,21 @@ Notes:
 - WhatsApp alerts: on the phone that should get them, follow the WhatsApp steps on
   https://www.callmebot.com (save their number and send the message they show). The
   reply contains the API key. Without it the store works and simply sends no alerts.
-- Emails go through Resend: order placed (with bank details and the private order
-  link), payment confirmed or rejected, shipped and cancelled to the customer; new
+- Emails go through the store's Gmail when `GMAIL_APP_PASSWORD` is set (no domain
+  needed, about 500 a day; turn on 2-Step Verification, then create the password
+  at myaccount.google.com/apppasswords). Otherwise they go through Resend: order placed (with bank details and the private order
+  link) and order delivered to the customer; new
   order and payment to check to the owner (`OWNER_EMAIL`, default the store email);
   and forgot-password links. Until a domain is verified in Resend they only reach
   the Resend account's own address. After verifying (Resend, Domains), set
   `EMAIL_FROM`, e.g. `Umar Collections <orders@umarcollections.pk>`. A failed email
   is logged and never fails the order.
+- "Continue with Google": in Google Cloud Console create a project, set up the OAuth
+  consent screen (External, app name, support email, home/privacy/terms links) and
+  publish it, then create an OAuth client of type Web application with Authorized
+  JavaScript origins `http://localhost:5173` and the live address (e.g.
+  `https://umarcollections.vercel.app`). No redirect URI and no client secret are
+  needed. Put its client ID in `GOOGLE_CLIENT_ID`; the button appears on its own.
 - Link previews (WhatsApp, Facebook) show the product's first photo on product pages
   and `client/public/og-image.jpg` everywhere else.
 
