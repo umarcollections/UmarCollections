@@ -115,11 +115,13 @@ const AdminOrdersPage = () => {
             </thead>
             <tbody className="divide-y divide-caramel-300/60">
               {orders.map((order) => (
-                <tr key={order._id} className="hover:bg-cream-100">
+                <tr key={order._id} className="relative hover:bg-cream-100">
                   <td className="px-3 py-2">
+                    {/* The link stretches over the whole row, so a click anywhere opens
+                        the order and it still opens in a new tab like any link */}
                     <Link
                       to={`/admin/orders/${order._id}`}
-                      className="font-medium text-espresso-900 hover:underline"
+                      className="font-medium text-espresso-900 after:absolute after:inset-0 hover:underline"
                     >
                       {order.orderNumber}
                     </Link>

@@ -82,15 +82,27 @@ const AdminOrderPage = () => {
                   )}
                 </dl>
                 {payment?.screenshot?.url && (
-                  <a
-                    href={payment.screenshot.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block w-48 rounded-xl border border-caramel-300/60 bg-cream-50 shadow-sm p-1 hover:border-espresso-900"
-                  >
-                    <img src={payment.screenshot.url} alt="Payment screenshot from the customer" />
-                    <span className="mt-1 block text-xs text-espresso-700">Open full size</span>
-                  </a>
+                  <div className="rounded-xl border border-caramel-300/60 bg-cream-50 p-4 shadow-sm">
+                    <h3 className="text-sm font-semibold text-espresso-900">Payment screenshot</h3>
+                    <p className="mt-0.5 text-xs text-espresso-700">
+                      Proof of transfer uploaded by the customer
+                    </p>
+                    <a
+                      href={payment.screenshot.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group mt-3 block w-56 max-w-full"
+                    >
+                      <img
+                        src={payment.screenshot.url}
+                        alt="Payment screenshot from the customer"
+                        className="w-full rounded-lg border border-caramel-300/60 transition group-hover:border-espresso-900"
+                      />
+                      <span className="mt-1.5 block text-xs text-espresso-700 group-hover:text-espresso-900 group-hover:underline">
+                        Open full size
+                      </span>
+                    </a>
+                  </div>
                 )}
               </section>
 

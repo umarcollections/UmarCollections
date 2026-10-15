@@ -42,6 +42,7 @@ const PATHS = {
     </>
   ),
   close: <path d="m6 6 12 12M18 6 6 18" />,
+  arrow: <path d="M5 12h14m-5.5-5.5L19 12l-5.5 5.5" />,
   plus: <path d="M12 5v14M5 12h14" />,
   minus: <path d="M5 12h14" />,
 };

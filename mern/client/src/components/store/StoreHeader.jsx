@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import StoreIcon from './StoreIcon.jsx';
+import StoreMenu from './StoreMenu.jsx';
+import StoreSearch from './StoreSearch.jsx';
 import useAuth from '../../hooks/auth/useAuth.js';
 import useCart from '../../hooks/cart/useCart.js';
 import useCategories from '../../hooks/categories/useCategories.js';
@@ -35,10 +37,17 @@ const StoreHeader = () => {
   const seenCount = useRef(count);
   const { data: categories = [] } = useCategories();
   const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { key } = useLocation();
+  // The open panel ('menu' or 'search') and the page it was opened on, so going
+  // to another page (a link, a search, Back) closes it
+  const [opened, setOpened] = useState(null);
+  const panel = opened?.key === key ? opened.name : null;
+  const menuOpen = panel === 'menu';
+  const searchOpen = panel === 'search';
+  const togglePanel = (name) => setOpened(panel === name ? null : { name, key });
+  const closePanel = () => setOpened(null);
   const header = useRef(null);
   const account = accountLink(user);
-  const closeMenu = () => setMenuOpen(false);
 
   useGSAP(
     () => {
@@ -72,56 +81,39 @@ const StoreHeader = () => {
     { scope: header, dependencies: [count] }
   );
 
-  // The menu's links slide in one after another
-  useGSAP(
-    () => {
-      if (!menuOpen) return;
-      const mm = gsap.matchMedia();
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
-        gsap.from('[data-menu-panel]', { autoAlpha: 0, duration: 0.4, ease: 'power2.out' });
-        gsap.from('[data-menu-link]', {
-          yPercent: 100,
-          autoAlpha: 0,
-          duration: 0.7,
-          ease: 'power4.out',
-          stagger: 0.06,
-          delay: 0.1,
-        });
-      });
-    },
-    { scope: header, dependencies: [menuOpen], revertOnUpdate: true }
-  );
-
-  // While the menu is open the page behind it doesn't scroll, and Escape closes it
+  // Escape closes the open panel; behind the full-screen menu the page doesn't scroll
   useEffect(() => {
-    if (!menuOpen) return;
-    const onKey = (event) => event.key === 'Escape' && setMenuOpen(false);
-    document.body.style.overflow = 'hidden';
+    if (!panel) return;
+    const onKey = (event) => event.key === 'Escape' && setOpened(null);
+    if (panel === 'menu') document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', onKey);
     };
-  }, [menuOpen]);
+  }, [panel]);
 
   return (
-    <header
-      ref={header}
-      className={`sticky top-0 z-30 transition-[background-color,box-shadow,backdrop-filter] duration-500 ${
-        scrolled || menuOpen
-          ? 'bg-cream-50/85 shadow-[0_1px_0_rgba(46,32,24,0.08)] backdrop-blur-xl'
-          : 'bg-transparent'
-      }`}
-    >
-      <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 sm:gap-4 sm:px-8 lg:h-20">
+    <header ref={header} className="sticky top-0 z-30">
+      {/* The frosted glass is its own layer: a backdrop-filter on the header
+          itself would shrink the fixed phone menu to the header's height */}
+      <div
+        aria-hidden="true"
+        className={`absolute inset-0 transition-[background-color,box-shadow,backdrop-filter] duration-500 ${
+          scrolled || panel
+            ? 'bg-cream-50/85 shadow-[0_1px_0_rgba(46,32,24,0.08)] backdrop-blur-xl'
+            : 'bg-transparent'
+        }`}
+      />
+      <div className="relative mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 sm:gap-4 sm:px-8 lg:h-20">
         <div className="flex items-center gap-8">
           <button
             type="button"
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() => togglePanel('menu')}
             aria-expanded={menuOpen}
             aria-controls="store-menu"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            className="relative z-10 -ml-2 grid size-10 place-items-center text-espresso-900 lg:hidden"
+            className="relative z-10 -ml-2 grid size-10 place-items-center rounded-full text-espresso-900 transition hover:bg-caramel-300/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tangerine-500 lg:hidden"
           >
             <StoreIcon name={menuOpen ? 'close' : 'menu'} className="size-6" />
           </button>
@@ -136,20 +128,23 @@ const StoreHeader = () => {
 
         <Link
           to="/"
-          onClick={closeMenu}
+          onClick={closePanel}
           className="relative z-10 whitespace-nowrap py-2 font-display text-sm font-semibold uppercase tracking-[0.1em] text-espresso-900 min-[380px]:text-base min-[380px]:tracking-[0.12em] sm:text-2xl sm:tracking-[0.22em] lg:text-3xl"
         >
           <Wordmark />
         </Link>
 
         <div className="relative z-10 -mr-2 flex items-center justify-end text-espresso-900 sm:mr-0 sm:gap-2">
-          <Link
-            to="/shop"
-            aria-label="Search products"
+          <button
+            type="button"
+            onClick={() => togglePanel('search')}
+            aria-expanded={searchOpen}
+            aria-controls="store-search"
+            aria-label={searchOpen ? 'Close search' : 'Search products'}
             className="grid size-10 place-items-center rounded-full transition hover:bg-caramel-300/40 hover:text-tangerine-700"
           >
-            <StoreIcon name="search" />
-          </Link>
+            <StoreIcon name={searchOpen ? 'close' : 'search'} />
+          </button>
           <Link
             to={account.to}
             aria-label={account.label}
@@ -178,39 +173,14 @@ const StoreHeader = () => {
       </div>
 
       {menuOpen && (
-        <div
-          id="store-menu"
-          data-menu-panel
-          className="fixed inset-0 z-0 overflow-y-auto bg-glow px-6 pb-12 pt-28 lg:hidden"
-        >
-          <nav aria-label="Main">
-            <ul className="space-y-2">
-              {[
-                ...NAV_LINKS,
-                ...categories.map((c) => ({ to: `/shop?category=${c.slug}`, label: c.name })),
-              ].map((link) => (
-                <li key={link.to} className="overflow-hidden">
-                  <Link
-                    data-menu-link
-                    to={link.to}
-                    onClick={closeMenu}
-                    className="block font-display text-4xl text-espresso-900"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <Link
-            to={account.to}
-            onClick={closeMenu}
-            className="mt-7 inline-block py-3 text-xs font-semibold uppercase tracking-[0.22em] text-espresso-900 underline underline-offset-8"
-          >
-            {account.label}
-          </Link>
-        </div>
+        <StoreMenu
+          links={NAV_LINKS}
+          categories={categories}
+          account={account}
+          onClose={closePanel}
+        />
       )}
+      {searchOpen && <StoreSearch onClose={closePanel} />}
     </header>
   );
 };

@@ -5,6 +5,7 @@ import ProductGrid from '../../components/products/ProductGrid.jsx';
 import PageBanner from '../../components/store/PageBanner.jsx';
 import useCategories from '../../hooks/categories/useCategories.js';
 import usePageTitle from '../../hooks/common/usePageTitle.js';
+import useMediaQuery from '../../hooks/common/useMediaQuery.js';
 import useStoreMotion from '../../hooks/common/useStoreMotion.js';
 import useProducts from '../../hooks/products/useProducts.js';
 import store from '../../lib/store.js';
@@ -69,6 +70,56 @@ const ShopPage = () => {
       categories.length > 0 &&
       `Shop ${listOf(categories.map((c) => c.name.toLowerCase()))} from ${store.name}, delivered within ${store.city}.`);
   usePageTitle(pageTitle({ q, category: currentCategory, page }));
+  // Phones and tablets get the search at the top of the page, not below the banner
+  const searchOnTop = useMediaQuery('(max-width: 1023px)');
+
+  const toolbar = (
+    <div
+      className={`flex flex-wrap items-center gap-4 ${searchOnTop ? 'mb-10' : 'border-b border-espresso-900/10 pb-8'}`}
+    >
+      <form onSubmit={handleSearch} role="search" className="relative min-w-[16rem] flex-1">
+        <label htmlFor="shop-search" className="sr-only">
+          Search products
+        </label>
+        <input
+          id="shop-search"
+          name="q"
+          type="search"
+          defaultValue={q}
+          key={q}
+          placeholder="Search products"
+          className="w-full rounded-full border border-caramel-300 bg-cream-50 px-6 py-3.5 pr-28 text-sm text-espresso-900 outline-none transition placeholder:text-espresso-700/50 focus:border-caramel-500 focus:bg-white focus:ring-4 focus:ring-caramel-400/20"
+        />
+        <button
+          type="submit"
+          className="absolute inset-y-1.5 right-1.5 rounded-full bg-caramel-300 px-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-espresso-900 transition hover:bg-caramel-400"
+        >
+          Search
+        </button>
+      </form>
+
+      <label className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-espresso-800">
+        Sort
+        <select
+          value={sort}
+          onChange={(event) =>
+            updateParams({
+              sort: event.target.value === 'newest' ? '' : event.target.value,
+              page: '',
+            })
+          }
+          className="rounded-full border border-caramel-300 bg-cream-50 px-5 py-3 text-sm normal-case tracking-normal text-espresso-900 outline-none transition focus:border-caramel-500 focus:bg-white focus:ring-4 focus:ring-caramel-400/20"
+        >
+          {SORTS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
+  );
+
   // New results get their own entrance
   useStoreMotion(pageRef, [heading, products.map((p) => p._id).join()]);
 
@@ -80,6 +131,7 @@ const ShopPage = () => {
         eyebrow={data ? `${data.pagination.total} pieces` : 'Shop'}
         title={heading}
         text={intro}
+        lead={searchOnTop && toolbar}
       >
         <div data-reveal className="mt-10 flex flex-wrap gap-2">
           <button
@@ -103,50 +155,11 @@ const ShopPage = () => {
       </PageBanner>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-8">
-        <div className="flex flex-wrap items-center gap-4 border-b border-espresso-900/10 pb-8">
-          <form onSubmit={handleSearch} role="search" className="relative min-w-[16rem] flex-1">
-            <label htmlFor="shop-search" className="sr-only">
-              Search products
-            </label>
-            <input
-              id="shop-search"
-              name="q"
-              type="search"
-              defaultValue={q}
-              key={q}
-              placeholder="Search products"
-              className="w-full rounded-full border border-caramel-300 bg-cream-50 px-6 py-3.5 pr-28 text-sm text-espresso-900 outline-none transition placeholder:text-espresso-700/50 focus:border-caramel-500 focus:bg-white focus:ring-4 focus:ring-caramel-400/20"
-            />
-            <button
-              type="submit"
-              className="absolute inset-y-1.5 right-1.5 rounded-full bg-caramel-300 px-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-espresso-900 transition hover:bg-caramel-400"
-            >
-              Search
-            </button>
-          </form>
+        {!searchOnTop && toolbar}
 
-          <label className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-espresso-800">
-            Sort
-            <select
-              value={sort}
-              onChange={(event) =>
-                updateParams({
-                  sort: event.target.value === 'newest' ? '' : event.target.value,
-                  page: '',
-                })
-              }
-              className="rounded-full border border-caramel-300 bg-cream-50 px-5 py-3 text-sm normal-case tracking-normal text-espresso-900 outline-none transition focus:border-caramel-500 focus:bg-white focus:ring-4 focus:ring-caramel-400/20"
-            >
-              {SORTS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div className={`mt-12 transition-opacity ${isFetching && !isPending ? 'opacity-60' : ''}`}>
+        <div
+          className={`transition-opacity ${searchOnTop ? '' : 'mt-12'} ${isFetching && !isPending ? 'opacity-60' : ''}`}
+        >
           {isPending && <p className="text-sm text-espresso-700">Loading products…</p>}
           {error && !data && <p className="text-sm text-red-700">{error.message}</p>}
 
